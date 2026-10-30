@@ -1,9 +1,15 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import Toolbar from './components/Toolbar';
 import PageArea from './components/PageArea';
 import StatusBar from './components/StatusBar';
 import InstallBanner from './components/InstallBanner';
 import InstallHelp from './components/InstallHelp';
+import InstallPage from './components/InstallPage';
+import InstallFloatingBtn from './components/InstallFloatingBtn';
+import AIAssistant from './components/AIAssistant';
+import ToastContainer, { showToast } from './components/Toast';
+import DocumentList from './components/DocumentList';
+import { DocumentManager, SavedDocument } from './utils/DocumentManager';
 import './styles/editor.css';
 
 function App() {
@@ -12,7 +18,18 @@ function App() {
   const [fileName, setFileName] = useState('Sans titre');
   const [isEditing, setIsEditing] = useState(false);
   const [showInstallHelp, setShowInstallHelp] = useState(false);
+  const [showInstallPage, setShowInstallPage] = useState(false);
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
+  const [showDocumentList, setShowDocumentList] = useState(false);
   const editorRef = useRef<HTMLDivElement>(null);
+
+  // Check if URL has /install or ?install=true
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('install') === 'true' || window.location.hash === '#install') {
+      setShowInstallPage(true);
+    }
+  }, []);
 
   const handleInput = useCallback(() => {
     if (editorRef.current) {
@@ -51,6 +68,7 @@ ${content}
       a.download = `${fileName}.html`;
       a.click();
       URL.revokeObjectURL(url);
+      showToast('Document exporté en HTML', 'success');
     }
   };
 
@@ -64,38 +82,39 @@ ${content}
       a.download = `${fileName}.txt`;
       a.click();
       URL.revokeObjectURL(url);
+      showToast('Document exporté en TXT', 'success');
     }
   };
 
   const handleSaveLocal = () => {
     if (editorRef.current) {
-      const data = {
-        content: editorRef.current.innerHTML,
-        fileName,
-        timestamp: new Date().toISOString()
-      };
-      localStorage.setItem('wordrapide_doc', JSON.stringify(data));
-      alert('Document sauvegardé localement !');
+      const content = editorRef.current.innerHTML;
+      const doc = DocumentManager.saveDocument(fileName, content, wordCount);
+      showToast(`"${doc.name}" sauvegardé avec succès !`, 'success');
     }
   };
 
   const handleLoadLocal = () => {
-    const saved = localStorage.getItem('wordrapide_doc');
-    if (saved && editorRef.current) {
-      const data = JSON.parse(saved);
-      editorRef.current.innerHTML = data.content;
-      setFileName(data.fileName);
+    setShowDocumentList(true);
+  };
+
+  const handleLoadDocument = (doc: SavedDocument) => {
+    if (editorRef.current) {
+      editorRef.current.innerHTML = doc.content;
+      setFileName(doc.name);
       handleInput();
+      showToast(`"${doc.name}" chargé !`, 'success');
     }
   };
 
   const handleNewDocument = () => {
     if (editorRef.current) {
-      if (confirm('Créer un nouveau document ? Les modifications non sauvegardées seront perdues.')) {
+      if (window.confirm('Créer un nouveau document ? Les modifications non sauvegardées seront perdues.')) {
         editorRef.current.innerHTML = '';
         setFileName('Sans titre');
         setWordCount(0);
         setCharCount(0);
+        showToast('Nouveau document créé', 'info');
       }
     }
   };
@@ -118,6 +137,9 @@ ${content}
         `);
         printWindow.document.close();
         printWindow.print();
+        showToast('Fenêtre d\'impression ouverte', 'info');
+      } else {
+        showToast('Impossible d\'ouvrir la fenêtre d\'impression', 'error');
       }
     }
   };
@@ -203,11 +225,30 @@ ${content}
           </div>
           <div className="w-px h-6 bg-gray-200 mx-1"></div>
           <button
-            onClick={() => setShowInstallHelp(true)}
-            className="px-3 py-1.5 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded transition"
+            onClick={() => setShowAIAssistant(!showAIAssistant)}
+            className={`px-3 py-1.5 text-sm rounded-lg transition font-medium ${
+              showAIAssistant
+                ? 'bg-purple-600 text-white hover:bg-purple-700'
+                : 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700'
+            }`}
+            title="Assistant IA Gemini"
+          >
+            <i className="fas fa-robot mr-1"></i> Assistant IA
+          </button>
+          <a
+            href={`${window.location.origin}${window.location.pathname}?install=true`}
+            onClick={(e) => { e.preventDefault(); setShowInstallPage(true); }}
+            className="px-4 py-1.5 text-sm bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 rounded-lg transition shadow-sm font-medium"
             title="Installer l'application"
           >
-            <i className="fas fa-desktop mr-1"></i> Installer
+            <i className="fas fa-download mr-1"></i> Installer l'app
+          </a>
+          <button
+            onClick={() => setShowInstallHelp(true)}
+            className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded transition"
+            title="Aide à l'installation"
+          >
+            <i className="fas fa-question-circle"></i>
           </button>
         </div>
       </header>
@@ -225,6 +266,37 @@ ${content}
       {showInstallHelp && (
         <InstallHelp onClose={() => setShowInstallHelp(false)} />
       )}
+
+      {/* Install Page */}
+      {showInstallPage && (
+        <InstallPage onClose={() => {
+          setShowInstallPage(false);
+          // Clean URL
+          const url = new URL(window.location.href);
+          url.searchParams.delete('install');
+          window.history.replaceState({}, '', url.pathname);
+        }} />
+      )}
+
+      {/* Floating Install Button */}
+      <InstallFloatingBtn />
+
+      {/* AI Assistant */}
+      <AIAssistant
+        editorRef={editorRef}
+        isOpen={showAIAssistant}
+        onClose={() => setShowAIAssistant(false)}
+      />
+
+      {/* Document List */}
+      <DocumentList
+        isOpen={showDocumentList}
+        onClose={() => setShowDocumentList(false)}
+        onLoadDocument={handleLoadDocument}
+      />
+
+      {/* Toast Notifications */}
+      <ToastContainer />
     </div>
   );
 }
