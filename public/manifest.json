@@ -24,6 +24,13 @@
       "description": "Créer un nouveau document",
       "url": "/?action=new",
       "icons": [{ "src": "/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Installer WordRapide",
+      "short_name": "Installer",
+      "description": "Installer l'application sur votre ordinateur",
+      "url": "/install.html",
+      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
     }
   ],
   "file_handlers": [

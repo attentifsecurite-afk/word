@@ -1,9 +1,10 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import Toolbar from './components/Toolbar';
 import PageArea from './components/PageArea';
 import StatusBar from './components/StatusBar';
 import InstallBanner from './components/InstallBanner';
 import InstallHelp from './components/InstallHelp';
+import InstallPage from './components/InstallPage';
 import './styles/editor.css';
 
 function App() {
@@ -12,7 +13,16 @@ function App() {
   const [fileName, setFileName] = useState('Sans titre');
   const [isEditing, setIsEditing] = useState(false);
   const [showInstallHelp, setShowInstallHelp] = useState(false);
+  const [showInstallPage, setShowInstallPage] = useState(false);
   const editorRef = useRef<HTMLDivElement>(null);
+
+  // Check if URL has /install or ?install=true
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('install') === 'true' || window.location.hash === '#install') {
+      setShowInstallPage(true);
+    }
+  }, []);
 
   const handleInput = useCallback(() => {
     if (editorRef.current) {
@@ -202,12 +212,20 @@ ${content}
             </div>
           </div>
           <div className="w-px h-6 bg-gray-200 mx-1"></div>
-          <button
-            onClick={() => setShowInstallHelp(true)}
-            className="px-3 py-1.5 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded transition"
+          <a
+            href={`${window.location.origin}${window.location.pathname}?install=true`}
+            onClick={(e) => { e.preventDefault(); setShowInstallPage(true); }}
+            className="px-4 py-1.5 text-sm bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 rounded-lg transition shadow-sm font-medium"
             title="Installer l'application"
           >
-            <i className="fas fa-desktop mr-1"></i> Installer
+            <i className="fas fa-download mr-1"></i> Installer l'app
+          </a>
+          <button
+            onClick={() => setShowInstallHelp(true)}
+            className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded transition"
+            title="Aide à l'installation"
+          >
+            <i className="fas fa-question-circle"></i>
           </button>
         </div>
       </header>
@@ -224,6 +242,17 @@ ${content}
       {/* Install Help Modal */}
       {showInstallHelp && (
         <InstallHelp onClose={() => setShowInstallHelp(false)} />
+      )}
+
+      {/* Install Page */}
+      {showInstallPage && (
+        <InstallPage onClose={() => {
+          setShowInstallPage(false);
+          // Clean URL
+          const url = new URL(window.location.href);
+          url.searchParams.delete('install');
+          window.history.replaceState({}, '', url.pathname);
+        }} />
       )}
     </div>
   );

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Installer WordRapide</title>
+  <meta name="description" content="Installez WordRapide sur votre ordinateur - Mac et Windows">
+  <meta name="theme-color" content="#2563eb">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/svg+xml" href="/icon.svg">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .gradient-bg {
+      background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #6366f1 100%);
+    }
+    .glass {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    .float-animation {
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 1; }
+      100% { transform: scale(1.3); opacity: 0; }
+    }
+    .pulse-ring::before {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: inherit;
+      border: 2px solid rgba(255,255,255,0.5);
+      animation: pulse-ring 2s ease-out infinite;
+    }
+  </style>
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center p-4">
+  <div class="max-w-lg w-full text-center text-white">
+    <!-- App Icon -->
+    <div class="float-animation mb-8 inline-block">
+      <div class="w-28 h-28 mx-auto bg-white/20 backdrop-blur-sm rounded-3xl flex items-center justify-center shadow-2xl relative pulse-ring">
+        <span class="text-white font-bold text-6xl">W</span>
+      </div>
+    </div>
+
+    <h1 class="text-4xl md:text-5xl font-bold mb-3">WordRapide</h1>
+    <p class="text-xl text-blue-100 mb-2">Éditeur de texte professionnel</p>
+    <p class="text-blue-200 mb-8">Installez l'app sur votre Mac ou Windows</p>
+
+    <!-- Install Button -->
+    <a
+      href="/?install=true"
+      id="installBtn"
+      class="inline-flex items-center gap-3 bg-white text-blue-700 px-8 py-4 rounded-2xl font-bold text-lg hover:bg-blue-50 transition-all transform hover:scale-105 active:scale-95 shadow-2xl shadow-black/20 mb-6"
+    >
+      <i class="fas fa-download text-xl"></i>
+      Installer maintenant
+    </a>
+
+    <p class="text-sm text-blue-200 mb-8">Gratuit • Hors-ligne • Sans pub</p>
+
+    <!-- Features -->
+    <div class="grid grid-cols-2 gap-3 mb-8">
+      <div class="glass rounded-xl p-4">
+        <i class="fas fa-bolt text-yellow-300 text-2xl mb-2"></i>
+        <p class="text-sm">Ultra rapide</p>
+      </div>
+      <div class="glass rounded-xl p-4">
+        <i class="fas fa-wifi text-green-300 text-2xl mb-2"></i>
+        <p class="text-sm">Mode hors-ligne</p>
+      </div>
+      <div class="glass rounded-xl p-4">
+        <i class="fas fa-lock text-red-300 text-2xl mb-2"></i>
+        <p class="text-sm">100% privé</p>
+      </div>
+      <div class="glass rounded-xl p-4">
+        <i class="fas fa-desktop text-purple-300 text-2xl mb-2"></i>
+        <p class="text-sm">Mac & Windows</p>
+      </div>
+    </div>
+
+    <!-- Instructions -->
+    <div class="glass rounded-2xl p-6 text-left">
+      <h3 class="font-semibold mb-4 text-center">
+        <i class="fas fa-info-circle mr-2"></i>Comment installer ?
+      </h3>
+      
+      <div class="space-y-3">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 bg-blue-500/30 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+            <i class="fab fa-chrome"></i>
+          </div>
+          <div>
+            <p class="font-medium text-sm">Chrome</p>
+            <p class="text-xs text-blue-200">Cliquez sur ⊕ dans la barre d'adresse ou Menu → Installer</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 bg-blue-500/30 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+            <i class="fab fa-edge"></i>
+          </div>
+          <div>
+            <p class="font-medium text-sm">Edge</p>
+            <p class="text-xs text-blue-200">Menu (...) → Applications → Installer ce site</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 bg-blue-500/30 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+            <i class="fab fa-safari"></i>
+          </div>
+          <div>
+            <p class="font-medium text-sm">Safari (Mac)</p>
+            <p class="text-xs text-blue-200">Fichier → Ajouter au Dock</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="text-xs text-blue-300/50 mt-8">
+      WordRapide v1.0 — Progressive Web App
+    </p>
+  </div>
+
+  <script>
+    // Auto-trigger install prompt
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      // Auto-show install prompt after 1 second
+      setTimeout(() => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+        }
+      }, 1000);
+    });
+
+    document.getElementById('installBtn').addEventListener('click', async (e) => {
+      if (deferredPrompt) {
+        e.preventDefault();
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          deferredPrompt = null;
+        }
+      }
+    });
+  </script>
+</body>
+</html>
