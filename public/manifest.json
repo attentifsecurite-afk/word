@@ -1,0 +1,38 @@
+{
+  "name": "WordRapide - Éditeur de Texte",
+  "short_name": "WordRapide",
+  "description": "Éditeur de texte rapide et puissant, installable sur Mac et Windows",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f3f4f6",
+  "theme_color": "#2563eb",
+  "orientation": "any",
+  "categories": ["productivity", "utilities"],
+  "lang": "fr-FR",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Nouveau document",
+      "short_name": "Nouveau",
+      "description": "Créer un nouveau document",
+      "url": "/?action=new",
+      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
+    }
+  ],
+  "file_handlers": [
+    {
+      "action": "/",
+      "accept": {
+        "text/html": [".html", ".htm"],
+        "text/plain": [".txt", ".md"]
+      }
+    }
+  ]
+}

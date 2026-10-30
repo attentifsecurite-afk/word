@@ -2,6 +2,8 @@ import { useState, useRef, useCallback } from 'react';
 import Toolbar from './components/Toolbar';
 import PageArea from './components/PageArea';
 import StatusBar from './components/StatusBar';
+import InstallBanner from './components/InstallBanner';
+import InstallHelp from './components/InstallHelp';
 import './styles/editor.css';
 
 function App() {
@@ -9,6 +11,7 @@ function App() {
   const [charCount, setCharCount] = useState(0);
   const [fileName, setFileName] = useState('Sans titre');
   const [isEditing, setIsEditing] = useState(false);
+  const [showInstallHelp, setShowInstallHelp] = useState(false);
   const editorRef = useRef<HTMLDivElement>(null);
 
   const handleInput = useCallback(() => {
@@ -121,6 +124,9 @@ ${content}
 
   return (
     <div className="flex flex-col h-screen bg-gray-100">
+      {/* Install Banner */}
+      <InstallBanner />
+
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-4 py-2 flex items-center gap-3 shadow-sm">
         <div className="flex items-center gap-2">
@@ -195,6 +201,14 @@ ${content}
               </button>
             </div>
           </div>
+          <div className="w-px h-6 bg-gray-200 mx-1"></div>
+          <button
+            onClick={() => setShowInstallHelp(true)}
+            className="px-3 py-1.5 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded transition"
+            title="Installer l'application"
+          >
+            <i className="fas fa-desktop mr-1"></i> Installer
+          </button>
         </div>
       </header>
 
@@ -206,6 +220,11 @@ ${content}
 
       {/* Status Bar */}
       <StatusBar wordCount={wordCount} charCount={charCount} fileName={fileName} />
+
+      {/* Install Help Modal */}
+      {showInstallHelp && (
+        <InstallHelp onClose={() => setShowInstallHelp(false)} />
+      )}
     </div>
   );
 }
