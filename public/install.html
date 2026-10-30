@@ -226,6 +226,35 @@
     .install-btn.installing .btn-installing { display: inline; }
     .btn-installing { display: none; }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Iframe warning */
+    .iframe-warning {
+      background: rgba(251, 191, 36, 0.2);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 24px;
+      animation: fadeUp 0.6s ease-out 0.8s both;
+    }
+    .iframe-warning p {
+      font-size: 14px;
+      color: rgba(255,255,255,0.9);
+    }
+    .iframe-warning a {
+      display: inline-block;
+      margin-top: 12px;
+      background: white;
+      color: #1d4ed8;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .iframe-warning a:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
   </style>
 </head>
 <body>
@@ -295,6 +324,14 @@
       </div>
     </div>
 
+    <!-- Iframe warning -->
+    <div class="iframe-warning" id="iframeWarning" style="display: none;">
+      <p><i class="fas fa-info-circle"></i> Vous êtes dans un aperçu. Pour installer l'application, ouvrez-la dans une nouvelle fenêtre :</p>
+      <a href="#" id="openInNewWindow" target="_blank">
+        <i class="fas fa-external-link-alt"></i> Ouvrir dans une nouvelle fenêtre
+      </a>
+    </div>
+
     <p class="footer">WordRapide v1.0 — Application Web Progressive</p>
   </div>
 
@@ -303,6 +340,19 @@
     const installBtn = document.getElementById('installBtn');
     const statusText = document.getElementById('statusText');
     const manualSection = document.getElementById('manualSection');
+    const iframeWarning = document.getElementById('iframeWarning');
+    const openInNewWindow = document.getElementById('openInNewWindow');
+
+    // Check if in iframe
+    const isInIframe = window.self !== window.top;
+    
+    if (isInIframe) {
+      // Show iframe warning and set link
+      iframeWarning.style.display = 'block';
+      openInNewWindow.href = window.location.href;
+      installBtn.style.display = 'none';
+      statusText.innerHTML = '<i class="fas fa-info-circle"></i> Ouvrez dans une nouvelle fenêtre pour installer';
+    }
 
     // Capture the install prompt event
     window.addEventListener('beforeinstallprompt', (e) => {
@@ -311,22 +361,24 @@
       statusText.innerHTML = '<i class="fas fa-check-circle" style="color: #6ee7b7;"></i> Prêt à installer — Cliquez sur le bouton !';
       statusText.className = 'status success';
       
-      // AUTO-TRIGGER: Show install dialog automatically after 500ms
-      setTimeout(() => {
-        if (deferredPrompt) {
-          deferredPrompt.prompt();
-          deferredPrompt.userChoice.then((result) => {
-            if (result.outcome === 'accepted') {
-              onInstalled();
-            }
-            deferredPrompt = null;
-          });
-        }
-      }, 500);
+      // AUTO-TRIGGER: Show install dialog automatically after 500ms (sauf dans iframe)
+      if (!isInIframe) {
+        setTimeout(() => {
+          if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((result) => {
+              if (result.outcome === 'accepted') {
+                onInstalled();
+              }
+              deferredPrompt = null;
+            });
+          }
+        }, 500);
+      }
     });
 
-    // Check if already installed
-    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+    // Check if already installed (sauf dans iframe)
+    if (!isInIframe && (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone)) {
       onInstalled();
     }
 
@@ -361,15 +413,18 @@
       statusText.innerHTML = '<i class="fas fa-rocket"></i> WordRapide est maintenant sur votre ordinateur !';
       statusText.className = 'status success';
       manualSection.style.display = 'none';
+      iframeWarning.style.display = 'none';
     }
 
-    // Fallback: if no beforeinstallprompt after 3s, show manual
-    setTimeout(() => {
-      if (!deferredPrompt && !window.matchMedia('(display-mode: standalone)').matches) {
-        manualSection.style.display = 'block';
-        statusText.innerHTML = '<i class="fas fa-info-circle"></i> Utilisez les instructions ci-dessous pour installer';
-      }
-    }, 3000);
+    // Fallback: if no beforeinstallprompt after 3s, show manual (sauf dans iframe)
+    if (!isInIframe) {
+      setTimeout(() => {
+        if (!deferredPrompt && !window.matchMedia('(display-mode: standalone)').matches) {
+          manualSection.style.display = 'block';
+          statusText.innerHTML = '<i class="fas fa-info-circle"></i> Utilisez les instructions ci-dessous pour installer';
+        }
+      }, 3000);
+    }
   </script>
 </body>
 </html>

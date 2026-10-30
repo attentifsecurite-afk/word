@@ -12,8 +12,16 @@ export function useInstallPrompt() {
   const [isInstalling, setIsInstalling] = useState(false);
 
   useEffect(() => {
-    // Check if already installed
-    if (window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone) {
+    // Ne pas détecter comme "installée" si on est dans un iframe (preview, sandbox)
+    const isInIframe = window.self !== window.top;
+    
+    // Vérifier si vraiment installé en mode standalone (PAS dans un iframe)
+    const isStandalone = !isInIframe && (
+      window.matchMedia('(display-mode: standalone)').matches || 
+      (window.navigator as any).standalone === true
+    );
+
+    if (isStandalone) {
       setIsInstalled(true);
       return;
     }
@@ -62,13 +70,5 @@ export function useInstallPrompt() {
     return false;
   }, [deferredPrompt]);
 
-  // Auto-trigger install prompt
-  const autoInstall = useCallback(async () => {
-    if (!deferredPrompt) return false;
-    // Small delay to ensure UI is ready
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return install();
-  }, [deferredPrompt, install]);
-
-  return { isInstallable, isInstalled, isInstalling, install, autoInstall };
+  return { isInstallable, isInstalled, isInstalling, install };
 }

@@ -4,19 +4,21 @@ import { useEffect, useState } from 'react';
 export default function InstallBanner() {
   const { isInstallable, isInstalled, install } = useInstallPrompt();
   const [autoTriggered, setAutoTriggered] = useState(false);
+  const isInIframe = window.self !== window.top;
 
-  // Auto-trigger install prompt when banner appears
+  // Auto-trigger install prompt when banner appears (sauf dans iframe)
   useEffect(() => {
-    if (isInstallable && !isInstalled && !autoTriggered) {
+    if (isInstallable && !isInstalled && !autoTriggered && !isInIframe) {
       const timer = setTimeout(() => {
         install();
         setAutoTriggered(true);
       }, 1500);
       return () => clearTimeout(timer);
     }
-  }, [isInstallable, isInstalled, autoTriggered, install]);
+  }, [isInstallable, isInstalled, autoTriggered, install, isInIframe]);
 
-  if (isInstalled || !isInstallable) return null;
+  // Ne pas afficher dans un iframe ou si déjà installé
+  if (isInstalled || !isInstallable || isInIframe) return null;
 
   return (
     <div className="install-banner bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 flex items-center justify-between text-sm shadow-md">

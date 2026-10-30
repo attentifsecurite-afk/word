@@ -4,30 +4,20 @@ import { useEffect, useState } from 'react';
 export default function InstallFloatingBtn() {
   const { isInstallable, isInstalled, install } = useInstallPrompt();
   const [show, setShow] = useState(false);
-  const [clicked, setClicked] = useState(false);
+  const isInIframe = window.self !== window.top;
 
-  // Show button after 2 seconds if installable
+  // Show button after 2 seconds if installable (sauf dans iframe)
   useEffect(() => {
-    if (isInstallable && !isInstalled) {
+    if (isInstallable && !isInstalled && !isInIframe) {
       const timer = setTimeout(() => setShow(true), 2000);
       return () => clearTimeout(timer);
     }
-  }, [isInstallable, isInstalled]);
+  }, [isInstallable, isInstalled, isInIframe]);
 
-  // Auto-trigger after showing
-  useEffect(() => {
-    if (show && !clicked) {
-      const timer = setTimeout(() => {
-        install();
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [show, clicked, install]);
-
-  if (isInstalled || !show) return null;
+  // Ne pas afficher dans un iframe ou si déjà installé
+  if (isInstalled || !show || isInIframe) return null;
 
   const handleClick = async () => {
-    setClicked(true);
     await install();
   };
 
