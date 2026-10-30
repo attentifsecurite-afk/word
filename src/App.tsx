@@ -8,6 +8,8 @@ import InstallPage from './components/InstallPage';
 import InstallFloatingBtn from './components/InstallFloatingBtn';
 import AIAssistant from './components/AIAssistant';
 import ToastContainer, { showToast } from './components/Toast';
+import DocumentList from './components/DocumentList';
+import { DocumentManager, SavedDocument } from './utils/DocumentManager';
 import './styles/editor.css';
 
 function App() {
@@ -18,6 +20,7 @@ function App() {
   const [showInstallHelp, setShowInstallHelp] = useState(false);
   const [showInstallPage, setShowInstallPage] = useState(false);
   const [showAIAssistant, setShowAIAssistant] = useState(false);
+  const [showDocumentList, setShowDocumentList] = useState(false);
   const editorRef = useRef<HTMLDivElement>(null);
 
   // Check if URL has /install or ?install=true
@@ -85,26 +88,22 @@ ${content}
 
   const handleSaveLocal = () => {
     if (editorRef.current) {
-      const data = {
-        content: editorRef.current.innerHTML,
-        fileName,
-        timestamp: new Date().toISOString()
-      };
-      localStorage.setItem('wordrapide_doc', JSON.stringify(data));
-      showToast('Document sauvegardé avec succès !', 'success');
+      const content = editorRef.current.innerHTML;
+      const doc = DocumentManager.saveDocument(fileName, content, wordCount);
+      showToast(`"${doc.name}" sauvegardé avec succès !`, 'success');
     }
   };
 
   const handleLoadLocal = () => {
-    const saved = localStorage.getItem('wordrapide_doc');
-    if (saved && editorRef.current) {
-      const data = JSON.parse(saved);
-      editorRef.current.innerHTML = data.content;
-      setFileName(data.fileName);
+    setShowDocumentList(true);
+  };
+
+  const handleLoadDocument = (doc: SavedDocument) => {
+    if (editorRef.current) {
+      editorRef.current.innerHTML = doc.content;
+      setFileName(doc.name);
       handleInput();
-      showToast('Document chargé !', 'success');
-    } else {
-      showToast('Aucun document sauvegardé trouvé', 'warning');
+      showToast(`"${doc.name}" chargé !`, 'success');
     }
   };
 
@@ -287,6 +286,13 @@ ${content}
         editorRef={editorRef}
         isOpen={showAIAssistant}
         onClose={() => setShowAIAssistant(false)}
+      />
+
+      {/* Document List */}
+      <DocumentList
+        isOpen={showDocumentList}
+        onClose={() => setShowDocumentList(false)}
+        onLoadDocument={handleLoadDocument}
       />
 
       {/* Toast Notifications */}
