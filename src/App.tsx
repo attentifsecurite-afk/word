@@ -6,6 +6,8 @@ import InstallBanner from './components/InstallBanner';
 import InstallHelp from './components/InstallHelp';
 import InstallPage from './components/InstallPage';
 import InstallFloatingBtn from './components/InstallFloatingBtn';
+import AIAssistant from './components/AIAssistant';
+import ToastContainer, { showToast } from './components/Toast';
 import './styles/editor.css';
 
 function App() {
@@ -15,6 +17,7 @@ function App() {
   const [isEditing, setIsEditing] = useState(false);
   const [showInstallHelp, setShowInstallHelp] = useState(false);
   const [showInstallPage, setShowInstallPage] = useState(false);
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
   const editorRef = useRef<HTMLDivElement>(null);
 
   // Check if URL has /install or ?install=true
@@ -62,6 +65,7 @@ ${content}
       a.download = `${fileName}.html`;
       a.click();
       URL.revokeObjectURL(url);
+      showToast('Document exporté en HTML', 'success');
     }
   };
 
@@ -75,6 +79,7 @@ ${content}
       a.download = `${fileName}.txt`;
       a.click();
       URL.revokeObjectURL(url);
+      showToast('Document exporté en TXT', 'success');
     }
   };
 
@@ -86,7 +91,7 @@ ${content}
         timestamp: new Date().toISOString()
       };
       localStorage.setItem('wordrapide_doc', JSON.stringify(data));
-      alert('Document sauvegardé localement !');
+      showToast('Document sauvegardé avec succès !', 'success');
     }
   };
 
@@ -97,16 +102,20 @@ ${content}
       editorRef.current.innerHTML = data.content;
       setFileName(data.fileName);
       handleInput();
+      showToast('Document chargé !', 'success');
+    } else {
+      showToast('Aucun document sauvegardé trouvé', 'warning');
     }
   };
 
   const handleNewDocument = () => {
     if (editorRef.current) {
-      if (confirm('Créer un nouveau document ? Les modifications non sauvegardées seront perdues.')) {
+      if (window.confirm('Créer un nouveau document ? Les modifications non sauvegardées seront perdues.')) {
         editorRef.current.innerHTML = '';
         setFileName('Sans titre');
         setWordCount(0);
         setCharCount(0);
+        showToast('Nouveau document créé', 'info');
       }
     }
   };
@@ -129,6 +138,9 @@ ${content}
         `);
         printWindow.document.close();
         printWindow.print();
+        showToast('Fenêtre d\'impression ouverte', 'info');
+      } else {
+        showToast('Impossible d\'ouvrir la fenêtre d\'impression', 'error');
       }
     }
   };
@@ -213,6 +225,17 @@ ${content}
             </div>
           </div>
           <div className="w-px h-6 bg-gray-200 mx-1"></div>
+          <button
+            onClick={() => setShowAIAssistant(!showAIAssistant)}
+            className={`px-3 py-1.5 text-sm rounded-lg transition font-medium ${
+              showAIAssistant
+                ? 'bg-purple-600 text-white hover:bg-purple-700'
+                : 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700'
+            }`}
+            title="Assistant IA Gemini"
+          >
+            <i className="fas fa-robot mr-1"></i> Assistant IA
+          </button>
           <a
             href={`${window.location.origin}${window.location.pathname}?install=true`}
             onClick={(e) => { e.preventDefault(); setShowInstallPage(true); }}
@@ -258,6 +281,16 @@ ${content}
 
       {/* Floating Install Button */}
       <InstallFloatingBtn />
+
+      {/* AI Assistant */}
+      <AIAssistant
+        editorRef={editorRef}
+        isOpen={showAIAssistant}
+        onClose={() => setShowAIAssistant(false)}
+      />
+
+      {/* Toast Notifications */}
+      <ToastContainer />
     </div>
   );
 }
