@@ -1,17 +1,27 @@
 import { useInstallPrompt } from '../hooks/useInstallPrompt';
+import { useEffect, useState } from 'react';
 
 interface InstallPageProps {
   onClose: () => void;
 }
 
 export default function InstallPage({ onClose }: InstallPageProps) {
-  const { isInstallable, isInstalled, install } = useInstallPrompt();
+  const { isInstallable, isInstalled, isInstalling, install } = useInstallPrompt();
+  const [autoTriggered, setAutoTriggered] = useState(false);
+
+  // AUTO-INSTALL: Trigger immediately on page load
+  useEffect(() => {
+    if (isInstallable && !isInstalled && !autoTriggered) {
+      const timer = setTimeout(() => {
+        install();
+        setAutoTriggered(true);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isInstallable, isInstalled, autoTriggered, install]);
 
   const handleInstall = async () => {
-    const success = await install();
-    if (success) {
-      onClose();
-    }
+    await install();
   };
 
   return (
@@ -52,18 +62,27 @@ export default function InstallPage({ onClose }: InstallPageProps) {
             <>
               <button
                 onClick={handleInstall}
-                disabled={!isInstallable}
-                className={`w-full py-4 px-8 rounded-xl font-bold text-lg transition-all transform hover:scale-105 active:scale-95 shadow-2xl mb-6 ${
+                disabled={!isInstallable || isInstalling}
+                className={`w-full py-4 px-8 rounded-xl font-bold text-lg transition-all transform hover:scale-105 active:scale-95 shadow-2xl mb-6 flex items-center justify-center gap-3 ${
                   isInstallable
                     ? 'bg-white text-blue-700 hover:bg-blue-50 shadow-white/20'
                     : 'bg-white/20 text-white/50 cursor-not-allowed'
                 }`}
               >
-                <i className="fas fa-download mr-3"></i>
-                {isInstallable ? 'Installer sur mon ordinateur' : 'Installation en cours...'}
+                {isInstalling ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-blue-700 border-t-transparent rounded-full animate-spin"></div>
+                    <span>Installation en cours...</span>
+                  </>
+                ) : (
+                  <>
+                    <i className="fas fa-download"></i>
+                    <span>{isInstallable ? 'Installer sur mon ordinateur' : 'Détection du navigateur...'}</span>
+                  </>
+                )}
               </button>
 
-              {!isInstallable && (
+              {!isInstallable && !isInstalling && (
                 <p className="text-sm text-blue-200 mb-6">
                   <i className="fas fa-info-circle mr-1"></i>
                   Le bouton d'installation apparaîtra automatiquement quand votre navigateur le supporte

@@ -5,6 +5,7 @@ import StatusBar from './components/StatusBar';
 import InstallBanner from './components/InstallBanner';
 import InstallHelp from './components/InstallHelp';
 import InstallPage from './components/InstallPage';
+import InstallFloatingBtn from './components/InstallFloatingBtn';
 import './styles/editor.css';
 
 function App() {
@@ -254,6 +255,9 @@ ${content}
           window.history.replaceState({}, '', url.pathname);
         }} />
       )}
+
+      {/* Floating Install Button */}
+      <InstallFloatingBtn />
     </div>
   );
 }
