@@ -3,8 +3,9 @@ import Home from './apps/Home';
 import WordApp from './apps/WordApp';
 import SheetApp from './apps/SheetApp';
 import SlideApp from './apps/SlideApp';
+import MailApp from './apps/MailApp';
 
-export type AppType = 'home' | 'word' | 'sheet' | 'slide';
+export type AppType = 'home' | 'word' | 'sheet' | 'slide' | 'mail';
 
 function App() {
   const [currentApp, setCurrentApp] = useState<AppType>('home');
@@ -19,6 +20,8 @@ function App() {
         return <SheetApp onBack={() => setCurrentApp('home')} />;
       case 'slide':
         return <SlideApp onBack={() => setCurrentApp('home')} />;
+      case 'mail':
+        return <MailApp onBack={() => setCurrentApp('home')} />;
       default:
         return <Home onNavigate={setCurrentApp} />;
     }

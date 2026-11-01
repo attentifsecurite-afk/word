@@ -29,6 +29,14 @@ export default function Home({ onNavigate }: HomeProps) {
       icon: 'fas fa-file-powerpoint',
       color: 'from-orange-500 to-orange-600',
       hoverColor: 'hover:from-orange-600 hover:to-orange-700'
+    },
+    {
+      id: 'mail' as AppType,
+      name: 'MailRapide',
+      description: 'Messagerie',
+      icon: 'fas fa-envelope',
+      color: 'from-red-500 to-red-600',
+      hoverColor: 'hover:from-red-600 hover:to-red-700'
     }
   ];
 
@@ -65,7 +73,7 @@ export default function Home({ onNavigate }: HomeProps) {
           </div>
 
           {/* Apps Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
             {apps.map((app) => (
               <button
                 key={app.id}
