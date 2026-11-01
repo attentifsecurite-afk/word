@@ -161,7 +161,7 @@ export default function WordApp({ onBack, onOpenStorage }: WordAppProps) {
           )}
         </div>
         <div className="flex items-center gap-2">
-          <button className="hover:bg-white/10 p-1.5 rounded transition" title="Sauvegarder">
+          <button onClick={handleSaveLocal} className="hover:bg-white/10 p-1.5 rounded transition" title="Sauvegarder">
             <i className="fas fa-save text-sm"></i>
           </button>
           <button onClick={handlePrint} className="hover:bg-white/10 p-1.5 rounded transition" title="Imprimer">

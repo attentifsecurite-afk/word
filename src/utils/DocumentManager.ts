@@ -1,30 +1,26 @@
 /**
- * Gestionnaire de Documents Amélioré
+ * Gestionnaire de Documents Unifié
  * Utilise le StorageManager pour une persistance robuste
  */
 
 import { LocalStorageManager } from './StorageManager';
 
-// Interface pour compatibilité avec l'ancien code
+// Interface unifiée pour tous les documents
 export interface SavedDocument {
   id: string;
   name: string;
   content: string;
+  type?: 'word' | 'excel' | 'powerpoint' | 'mail';
   timestamp: string;
-  wordCount: number;
-}
-
-// Nouvelle interface améliorée
-export interface Document {
-  id: string;
-  name: string;
-  content: string;
-  type: 'word' | 'excel' | 'powerpoint' | 'mail';
-  createdAt: string;
-  updatedAt: string;
-  size: number;
+  createdAt?: string;
+  updatedAt?: string;
+  wordCount?: number;
+  size?: number;
   tags?: string[];
 }
+
+// Alias pour compatibilité
+export type Document = SavedDocument;
 
 export class DocumentManager {
   private static DOCS_KEY = 'documents';
@@ -85,7 +81,7 @@ export class DocumentManager {
   /**
    * Récupère les documents par type
    */
-  static getByType(type: Document['type']): Document[] {
+  static getByType(type: 'word' | 'excel' | 'powerpoint' | 'mail'): Document[] {
     return this.getAll().filter(d => d.type === type);
   }
 
@@ -94,7 +90,11 @@ export class DocumentManager {
    */
   static getRecent(limit: number = 10): Document[] {
     return this.getAll()
-      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+      .sort((a, b) => {
+        const dateA = new Date(a.updatedAt || a.timestamp).getTime();
+        const dateB = new Date(b.updatedAt || b.timestamp).getTime();
+        return dateB - dateA;
+      })
       .slice(0, limit);
   }
 
@@ -195,9 +195,13 @@ export class DocumentManager {
         powerpoint: docs.filter(d => d.type === 'powerpoint').length,
         mail: docs.filter(d => d.type === 'mail').length
       },
-      totalSize: docs.reduce((sum, doc) => sum + doc.size, 0),
+      totalSize: docs.reduce((sum, doc) => sum + (doc.size || 0), 0),
       lastModified: docs.length > 0 
-        ? docs.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())[0].updatedAt
+        ? docs.sort((a, b) => {
+            const dateA = new Date(a.updatedAt || a.timestamp).getTime();
+            const dateB = new Date(b.updatedAt || b.timestamp).getTime();
+            return dateB - dateA;
+          })[0].updatedAt || docs[0].timestamp
         : null
     };
   }
