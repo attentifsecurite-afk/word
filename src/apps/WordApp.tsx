@@ -6,9 +6,10 @@ import { importTextFile, exportHTML, exportText, isLocalStorageAvailable } from 
 
 interface WordAppProps {
   onBack: () => void;
+  onOpenStorage?: () => void;
 }
 
-export default function WordApp({ onBack }: WordAppProps) {
+export default function WordApp({ onBack, onOpenStorage }: WordAppProps) {
   const [wordCount, setWordCount] = useState(0);
   const [charCount, setCharCount] = useState(0);
   const [fileName, setFileName] = useState('Document1');
@@ -166,6 +167,11 @@ export default function WordApp({ onBack }: WordAppProps) {
           <button onClick={handlePrint} className="hover:bg-white/10 p-1.5 rounded transition" title="Imprimer">
             <i className="fas fa-print text-sm"></i>
           </button>
+          {onOpenStorage && (
+            <button onClick={onOpenStorage} className="hover:bg-white/10 p-1.5 rounded transition" title="Gestionnaire de stockage">
+              <i className="fas fa-database text-sm"></i>
+            </button>
+          )}
         </div>
       </div>
 

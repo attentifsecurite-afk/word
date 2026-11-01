@@ -4,6 +4,7 @@ import { importJSONFile, exportJSON, isLocalStorageAvailable } from '../utils/Fi
 
 interface SlideAppProps {
   onBack: () => void;
+  onOpenStorage?: () => void;
 }
 
 interface Slide {
@@ -13,7 +14,7 @@ interface Slide {
   background: string;
 }
 
-export default function SlideApp({ onBack }: SlideAppProps) {
+export default function SlideApp({ onBack, onOpenStorage }: SlideAppProps) {
   const [fileName, setFileName] = useState('Présentation1');
   const [isEditing, setIsEditing] = useState(false);
   const [slides, setSlides] = useState<Slide[]>([
@@ -256,6 +257,11 @@ ${slides.map((slide) => `
           <button onClick={handleExportJSON} className="hover:bg-white/10 p-1.5 rounded transition" title="Exporter">
             <i className="fas fa-file-export text-sm"></i>
           </button>
+          {onOpenStorage && (
+            <button onClick={onOpenStorage} className="hover:bg-white/10 p-1.5 rounded transition" title="Gestionnaire de stockage">
+              <i className="fas fa-database text-sm"></i>
+            </button>
+          )}
           <button 
             onClick={() => setIsPresenting(true)}
             className="bg-white/20 hover:bg-white/30 px-3 py-1 rounded transition"

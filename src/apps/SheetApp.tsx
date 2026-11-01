@@ -4,6 +4,7 @@ import { importCSVFile, exportCSV, parseCSV, isLocalStorageAvailable } from '../
 
 interface SheetAppProps {
   onBack: () => void;
+  onOpenStorage?: () => void;
 }
 
 interface CellData {
@@ -11,7 +12,7 @@ interface CellData {
   formula?: string;
 }
 
-export default function SheetApp({ onBack }: SheetAppProps) {
+export default function SheetApp({ onBack, onOpenStorage }: SheetAppProps) {
   const ROWS = 50;
   const COLS = 26;
   const [fileName, setFileName] = useState('Feuil1');
@@ -255,6 +256,11 @@ export default function SheetApp({ onBack }: SheetAppProps) {
           <button onClick={handleExport} className="hover:bg-white/10 p-1.5 rounded transition" title="Exporter">
             <i className="fas fa-download text-sm"></i>
           </button>
+          {onOpenStorage && (
+            <button onClick={onOpenStorage} className="hover:bg-white/10 p-1.5 rounded transition" title="Gestionnaire de stockage">
+              <i className="fas fa-database text-sm"></i>
+            </button>
+          )}
         </div>
       </div>
 

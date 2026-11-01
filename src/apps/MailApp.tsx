@@ -3,6 +3,7 @@ import ToastContainer, { showToast } from '../components/Toast';
 
 interface MailAppProps {
   onBack: () => void;
+  onOpenStorage?: () => void;
 }
 
 interface Email {
@@ -26,7 +27,7 @@ interface Contact {
 type Folder = 'inbox' | 'sent' | 'drafts' | 'trash';
 type View = 'list' | 'read' | 'compose' | 'contacts';
 
-export default function MailApp({ onBack }: MailAppProps) {
+export default function MailApp({ onBack, onOpenStorage }: MailAppProps) {
   const [emails, setEmails] = useState<Email[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [currentFolder, setCurrentFolder] = useState<Folder>('inbox');
@@ -248,6 +249,11 @@ export default function MailApp({ onBack }: MailAppProps) {
           >
             <i className="fas fa-pen mr-1"></i> Nouveau message
           </button>
+          {onOpenStorage && (
+            <button onClick={onOpenStorage} className="bg-white/20 hover:bg-white/30 px-3 py-1 rounded transition" title="Gestionnaire de stockage">
+              <i className="fas fa-database text-sm"></i>
+            </button>
+          )}
         </div>
       </div>
 

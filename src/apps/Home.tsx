@@ -2,9 +2,10 @@ import { AppType } from '../App';
 
 interface HomeProps {
   onNavigate: (app: AppType) => void;
+  onOpenStorage?: () => void;
 }
 
-export default function Home({ onNavigate }: HomeProps) {
+export default function Home({ onNavigate, onOpenStorage }: HomeProps) {
   const apps = [
     {
       id: 'word' as AppType,
@@ -57,6 +58,11 @@ export default function Home({ onNavigate }: HomeProps) {
           <h1 className="text-lg font-semibold">OfficeRapide</h1>
         </div>
         <div className="flex items-center gap-4">
+          {onOpenStorage && (
+            <button onClick={onOpenStorage} className="text-sm hover:bg-white/10 px-3 py-1 rounded transition">
+              <i className="fas fa-database mr-1"></i> Stockage
+            </button>
+          )}
           <button className="text-sm hover:bg-white/10 px-3 py-1 rounded transition">
             <i className="fas fa-user-circle mr-1"></i> Utilisateur
           </button>
