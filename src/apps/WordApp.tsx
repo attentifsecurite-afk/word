@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import ToastContainer, { showToast } from '../components/Toast';
 import { DocumentManager, SavedDocument } from '../utils/DocumentManager';
 import DocumentList from '../components/DocumentList';
+import { importTextFile, exportHTML, exportText, isLocalStorageAvailable } from '../utils/FileHandler';
 
 interface WordAppProps {
   onBack: () => void;
@@ -35,29 +36,24 @@ export default function WordApp({ onBack }: WordAppProps) {
     setIsEditing(false);
   };
 
+  const handleImport = async () => {
+    const result = await importTextFile();
+    if (result.success && result.data && editorRef.current) {
+      editorRef.current.innerHTML = result.data;
+      if (result.fileName) {
+        setFileName(result.fileName.replace(/\.(txt|html|htm|rtf|md)$/, ''));
+      }
+      handleInput();
+      showToast('Document importé avec succès', 'success');
+    } else if (result.error) {
+      showToast(result.error, 'error');
+    }
+  };
+
   const handleExportHTML = () => {
     if (editorRef.current) {
       const content = editorRef.current.innerHTML;
-      const html = `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>${fileName}</title>
-  <style>
-    body { font-family: 'Calibri', sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; line-height: 1.6; }
-  </style>
-</head>
-<body>
-${content}
-</body>
-</html>`;
-      const blob = new Blob([html], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${fileName}.html`;
-      a.click();
-      URL.revokeObjectURL(url);
+      exportHTML(content, fileName);
       showToast('Document exporté en HTML', 'success');
     }
   };
@@ -65,19 +61,17 @@ ${content}
   const handleExportTXT = () => {
     if (editorRef.current) {
       const text = editorRef.current.innerText;
-      const blob = new Blob([text], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${fileName}.txt`;
-      a.click();
-      URL.revokeObjectURL(url);
+      exportText(text, fileName);
       showToast('Document exporté en TXT', 'success');
     }
   };
 
   const handleSaveLocal = () => {
     if (editorRef.current) {
+      if (!isLocalStorageAvailable()) {
+        showToast('Stockage local non disponible. Utilisez Export à la place.', 'error');
+        return;
+      }
       const content = editorRef.current.innerHTML;
       const doc = DocumentManager.saveDocument(fileName, content, wordCount);
       showToast(`"${doc.name}" sauvegardé avec succès !`, 'success');
@@ -346,6 +340,10 @@ ${content}
             <button onClick={() => setShowDocumentList(true)} className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 rounded transition">
               <i className="fas fa-folder-open text-xl text-[#2b579a]"></i>
               <span className="text-xs">Ouvrir</span>
+            </button>
+            <button onClick={handleImport} className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 rounded transition">
+              <i className="fas fa-upload text-xl text-[#2b579a]"></i>
+              <span className="text-xs">Importer</span>
             </button>
             <button onClick={handlePrint} className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 rounded transition">
               <i className="fas fa-print text-xl text-[#2b579a]"></i>

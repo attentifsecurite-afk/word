@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import ToastContainer, { showToast } from '../components/Toast';
+import { importJSONFile, exportJSON, isLocalStorageAvailable } from '../utils/FileHandler';
 
 interface SlideAppProps {
   onBack: () => void;
@@ -71,12 +72,20 @@ export default function SlideApp({ onBack }: SlideAppProps) {
   };
 
   const handleSave = () => {
+    if (!isLocalStorageAvailable()) {
+      showToast('Stockage local non disponible. Utilisez Export à la place.', 'error');
+      return;
+    }
     const data = { fileName, slides };
     localStorage.setItem('sliderapide_doc', JSON.stringify(data));
     showToast('Présentation sauvegardée !', 'success');
   };
 
   const handleLoad = () => {
+    if (!isLocalStorageAvailable()) {
+      showToast('Stockage local non disponible', 'error');
+      return;
+    }
     const saved = localStorage.getItem('sliderapide_doc');
     if (saved) {
       const data = JSON.parse(saved);
@@ -87,6 +96,33 @@ export default function SlideApp({ onBack }: SlideAppProps) {
     } else {
       showToast('Aucune présentation sauvegardée', 'warning');
     }
+  };
+
+  const handleImportJSON = async () => {
+    const result = await importJSONFile();
+    if (result.success && result.data) {
+      try {
+        const data = JSON.parse(result.data);
+        if (data.fileName && data.slides) {
+          setFileName(data.fileName);
+          setSlides(data.slides);
+          setCurrentSlideIndex(0);
+          showToast('Présentation importée avec succès', 'success');
+        } else {
+          showToast('Format de fichier invalide', 'error');
+        }
+      } catch (error) {
+        showToast('Erreur lors de l\'import', 'error');
+      }
+    } else if (result.error) {
+      showToast(result.error, 'error');
+    }
+  };
+
+  const handleExportJSON = () => {
+    const data = { fileName, slides };
+    exportJSON(data, fileName);
+    showToast('Présentation exportée', 'success');
   };
 
   const handleExport = () => {
@@ -210,6 +246,15 @@ ${slides.map((slide) => `
         <div className="flex items-center gap-2">
           <button onClick={handleSave} className="hover:bg-white/10 p-1.5 rounded transition" title="Sauvegarder">
             <i className="fas fa-save text-sm"></i>
+          </button>
+          <button onClick={handleLoad} className="hover:bg-white/10 p-1.5 rounded transition" title="Charger">
+            <i className="fas fa-folder-open text-sm"></i>
+          </button>
+          <button onClick={handleImportJSON} className="hover:bg-white/10 p-1.5 rounded transition" title="Importer">
+            <i className="fas fa-file-import text-sm"></i>
+          </button>
+          <button onClick={handleExportJSON} className="hover:bg-white/10 p-1.5 rounded transition" title="Exporter">
+            <i className="fas fa-file-export text-sm"></i>
           </button>
           <button 
             onClick={() => setIsPresenting(true)}

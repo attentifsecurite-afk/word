@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import ToastContainer, { showToast } from '../components/Toast';
+import { importCSVFile, exportCSV, parseCSV, isLocalStorageAvailable } from '../utils/FileHandler';
 
 interface SheetAppProps {
   onBack: () => void;
@@ -146,12 +147,20 @@ export default function SheetApp({ onBack }: SheetAppProps) {
   };
 
   const handleSave = () => {
+    if (!isLocalStorageAvailable()) {
+      showToast('Stockage local non disponible. Utilisez Export CSV à la place.', 'error');
+      return;
+    }
     const data = { fileName, cells };
     localStorage.setItem('sheetrapide_doc', JSON.stringify(data));
     showToast('Tableur sauvegardé !', 'success');
   };
 
   const handleLoad = () => {
+    if (!isLocalStorageAvailable()) {
+      showToast('Stockage local non disponible', 'error');
+      return;
+    }
     const saved = localStorage.getItem('sheetrapide_doc');
     if (saved) {
       const data = JSON.parse(saved);
@@ -160,6 +169,31 @@ export default function SheetApp({ onBack }: SheetAppProps) {
       showToast('Tableur chargé !', 'success');
     } else {
       showToast('Aucun tableur sauvegardé', 'warning');
+    }
+  };
+
+  const handleImportCSV = async () => {
+    const result = await importCSVFile();
+    if (result.success && result.data) {
+      const csvData = parseCSV(result.data);
+      const newCells: Record<string, { value: string }> = {};
+      
+      csvData.forEach((row, rowIndex) => {
+        row.forEach((cellValue, colIndex) => {
+          if (cellValue && rowIndex < ROWS && colIndex < COLS) {
+            const key = getCellKey(rowIndex, colIndex);
+            newCells[key] = { value: cellValue };
+          }
+        });
+      });
+      
+      setCells(newCells);
+      if (result.fileName) {
+        setFileName(result.fileName.replace(/\.csv$/, ''));
+      }
+      showToast('CSV importé avec succès', 'success');
+    } else if (result.error) {
+      showToast(result.error, 'error');
     }
   };
 
@@ -173,13 +207,7 @@ export default function SheetApp({ onBack }: SheetAppProps) {
       }
       csv += row.join(',') + '\n';
     }
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${fileName}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    exportCSV(csv, fileName);
     showToast('Tableur exporté en CSV', 'success');
   };
 
@@ -324,6 +352,21 @@ export default function SheetApp({ onBack }: SheetAppProps) {
 
         {activeTab === 'data' && (
           <div className="flex items-center gap-4">
+            <button 
+              onClick={handleImportCSV}
+              className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 rounded transition"
+            >
+              <i className="fas fa-file-import text-xl text-[#217346]"></i>
+              <span className="text-xs">Importer CSV</span>
+            </button>
+            <button 
+              onClick={handleExport}
+              className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 rounded transition"
+            >
+              <i className="fas fa-file-export text-xl text-[#217346]"></i>
+              <span className="text-xs">Exporter CSV</span>
+            </button>
+            <div className="border-l border-gray-200 h-12"></div>
             <button 
               onClick={() => showToast('Fonction de tri à venir', 'info')}
               className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 rounded transition"
