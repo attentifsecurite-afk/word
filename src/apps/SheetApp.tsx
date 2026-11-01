@@ -13,11 +13,12 @@ interface CellData {
 export default function SheetApp({ onBack }: SheetAppProps) {
   const ROWS = 50;
   const COLS = 26;
-  const [fileName, setFileName] = useState('Tableur sans titre');
+  const [fileName, setFileName] = useState('Feuil1');
   const [isEditing, setIsEditing] = useState(false);
   const [cells, setCells] = useState<Record<string, CellData>>({});
   const [selectedCell, setSelectedCell] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
+  const [activeTab, setActiveTab] = useState('home');
 
   const getCellKey = (row: number, col: number): string => {
     const colLetter = String.fromCharCode(65 + col);
@@ -43,7 +44,6 @@ export default function SheetApp({ onBack }: SheetAppProps) {
     
     const expr = formula.substring(1);
     
-    // Handle SUM function
     const sumMatch = expr.match(/^SUM\(([A-Z])(\d+):([A-Z])(\d+)\)$/);
     if (sumMatch) {
       const [, startCol, startRow, endCol, endRow] = sumMatch;
@@ -58,7 +58,6 @@ export default function SheetApp({ onBack }: SheetAppProps) {
       return sum.toString();
     }
 
-    // Handle AVG function
     const avgMatch = expr.match(/^AVG\(([A-Z])(\d+):([A-Z])(\d+)\)$/);
     if (avgMatch) {
       const [, startCol, startRow, endCol, endRow] = avgMatch;
@@ -77,13 +76,11 @@ export default function SheetApp({ onBack }: SheetAppProps) {
       return count > 0 ? (sum / count).toString() : '0';
     }
 
-    // Handle simple cell references
     const cellRef = expr.match(/^([A-Z])(\d+)$/);
     if (cellRef) {
       return getCellValue(expr);
     }
 
-    // Handle basic arithmetic
     try {
       const replaced = expr.replace(/([A-Z])(\d+)/g, (match) => {
         const val = parseFloat(getCellValue(match));
@@ -121,7 +118,6 @@ export default function SheetApp({ onBack }: SheetAppProps) {
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleCellBlur();
-      // Move to next row
       if (selectedCell) {
         const col = selectedCell.charAt(0);
         const row = parseInt(selectedCell.substring(1));
@@ -133,7 +129,6 @@ export default function SheetApp({ onBack }: SheetAppProps) {
     } else if (e.key === 'Tab') {
       e.preventDefault();
       handleCellBlur();
-      // Move to next column
       if (selectedCell) {
         const col = selectedCell.charCodeAt(0);
         const row = selectedCell.substring(1);
@@ -188,17 +183,23 @@ export default function SheetApp({ onBack }: SheetAppProps) {
     showToast('Tableur exporté en CSV', 'success');
   };
 
+  const tabs = [
+    { id: 'home', label: 'Accueil', icon: 'fas fa-home' },
+    { id: 'insert', label: 'Insertion', icon: 'fas fa-plus' },
+    { id: 'formulas', label: 'Formules', icon: 'fas fa-function' },
+    { id: 'data', label: 'Données', icon: 'fas fa-database' },
+  ];
+
   return (
     <div className="flex flex-col h-screen bg-gray-100">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-4 py-2 flex items-center gap-3 shadow-sm">
-        <button onClick={onBack} className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded transition">
-          <i className="fas fa-arrow-left mr-1"></i> Retour
-        </button>
-        <div className="w-px h-6 bg-gray-200"></div>
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-green-600 rounded flex items-center justify-center">
-            <i className="fas fa-file-excel text-white"></i>
+      {/* Title Bar */}
+      <div className="bg-[#217346] text-white px-4 py-2 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <button onClick={onBack} className="hover:bg-white/10 p-1 rounded transition">
+            <i className="fas fa-arrow-left"></i>
+          </button>
+          <div className="w-6 h-6 bg-white/20 rounded flex items-center justify-center">
+            <i className="fas fa-file-excel text-sm"></i>
           </div>
           {isEditing ? (
             <input
@@ -207,38 +208,146 @@ export default function SheetApp({ onBack }: SheetAppProps) {
               onChange={handleFileNameChange}
               onBlur={() => setIsEditing(false)}
               onKeyDown={(e) => e.key === 'Enter' && setIsEditing(false)}
-              className="text-lg font-medium border-b-2 border-green-500 outline-none px-1"
+              className="bg-white/10 border border-white/30 rounded px-2 py-0.5 text-sm outline-none"
               autoFocus
             />
           ) : (
-            <h1
-              className="text-lg font-medium text-gray-700 cursor-pointer hover:bg-gray-100 px-2 py-1 rounded"
+            <span 
+              className="text-sm cursor-pointer hover:bg-white/10 px-2 py-0.5 rounded"
               onClick={() => setIsEditing(true)}
             >
-              {fileName}
-            </h1>
+              {fileName} - Excel
+            </span>
           )}
         </div>
-
-        <div className="ml-auto flex items-center gap-2">
-          <button onClick={handleSave} className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded transition">
-            <i className="fas fa-save mr-1"></i> Sauvegarder
+        <div className="flex items-center gap-2">
+          <button onClick={handleSave} className="hover:bg-white/10 p-1.5 rounded transition" title="Sauvegarder">
+            <i className="fas fa-save text-sm"></i>
           </button>
-          <button onClick={handleLoad} className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded transition">
-            <i className="fas fa-folder-open mr-1"></i> Charger
-          </button>
-          <button onClick={handleExport} className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded transition">
-            <i className="fas fa-download mr-1"></i> Exporter CSV
+          <button onClick={handleExport} className="hover:bg-white/10 p-1.5 rounded transition" title="Exporter">
+            <i className="fas fa-download text-sm"></i>
           </button>
         </div>
-      </header>
+      </div>
+
+      {/* Ribbon Tabs */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="flex items-center gap-1 px-2">
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-4 py-2 text-sm font-medium transition ${
+                activeTab === tab.id
+                  ? 'text-[#217346] border-b-2 border-[#217346]'
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Ribbon Content */}
+      <div className="bg-white border-b border-gray-200 px-4 py-3">
+        {activeTab === 'home' && (
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 border-r border-gray-200 pr-4">
+              <button onClick={() => document.execCommand('cut')} className="toolbar-btn" title="Couper">
+                <i className="fas fa-cut"></i>
+              </button>
+              <button onClick={() => document.execCommand('copy')} className="toolbar-btn" title="Copier">
+                <i className="fas fa-copy"></i>
+              </button>
+              <button onClick={() => document.execCommand('paste')} className="toolbar-btn" title="Coller">
+                <i className="fas fa-paste"></i>
+              </button>
+            </div>
+            <div className="flex items-center gap-2">
+              <select className="toolbar-select" defaultValue="Calibri">
+                <option>Calibri</option>
+                <option>Arial</option>
+                <option>Times New Roman</option>
+              </select>
+              <select className="toolbar-select w-16" defaultValue="11">
+                <option>9</option>
+                <option>10</option>
+                <option>11</option>
+                <option>12</option>
+                <option>14</option>
+              </select>
+              <button className="toolbar-btn font-bold" title="Gras">
+                <i className="fas fa-bold"></i>
+              </button>
+              <button className="toolbar-btn italic" title="Italique">
+                <i className="fas fa-italic"></i>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'formulas' && (
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => {
+                if (selectedCell) {
+                  const range = prompt('Plage (ex: A1:A10) :', 'A1:A10');
+                  if (range) {
+                    setEditValue(`=SUM(${range})`);
+                    handleCellBlur();
+                  }
+                }
+              }}
+              className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 rounded transition"
+            >
+              <i className="fas fa-calculator text-xl text-[#217346]"></i>
+              <span className="text-xs">Somme</span>
+            </button>
+            <button 
+              onClick={() => {
+                if (selectedCell) {
+                  const range = prompt('Plage (ex: A1:A10) :', 'A1:A10');
+                  if (range) {
+                    setEditValue(`=AVG(${range})`);
+                    handleCellBlur();
+                  }
+                }
+              }}
+              className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 rounded transition"
+            >
+              <i className="fas fa-chart-line text-xl text-[#217346]"></i>
+              <span className="text-xs">Moyenne</span>
+            </button>
+          </div>
+        )}
+
+        {activeTab === 'data' && (
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => showToast('Fonction de tri à venir', 'info')}
+              className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 rounded transition"
+            >
+              <i className="fas fa-sort text-xl text-[#217346]"></i>
+              <span className="text-xs">Trier</span>
+            </button>
+            <button 
+              onClick={() => showToast('Fonction de filtre à venir', 'info')}
+              className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 rounded transition"
+            >
+              <i className="fas fa-filter text-xl text-[#217346]"></i>
+              <span className="text-xs">Filtrer</span>
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Formula Bar */}
       <div className="bg-white border-b border-gray-200 px-4 py-2 flex items-center gap-2">
-        <div className="w-16 text-center font-mono text-sm font-semibold bg-gray-100 py-1 rounded">
+        <div className="w-16 text-center font-mono text-sm font-semibold bg-gray-100 py-1 rounded border border-gray-300">
           {selectedCell || '-'}
         </div>
-        <span className="text-gray-400">fx</span>
+        <span className="text-gray-400 font-semibold">fx</span>
         <input
           type="text"
           value={editValue}
@@ -246,7 +355,7 @@ export default function SheetApp({ onBack }: SheetAppProps) {
           onBlur={handleCellBlur}
           onKeyDown={handleKeyDown}
           placeholder="Entrez une valeur ou formule (=SUM(A1:A10))"
-          className="flex-1 px-3 py-1 border border-gray-300 rounded text-sm font-mono focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          className="flex-1 px-3 py-1 border border-gray-300 rounded text-sm font-mono focus:ring-2 focus:ring-[#217346] focus:border-transparent"
         />
       </div>
 
@@ -255,9 +364,9 @@ export default function SheetApp({ onBack }: SheetAppProps) {
         <table className="border-collapse w-full">
           <thead className="sticky top-0 bg-gray-100 z-10">
             <tr>
-              <th className="border border-gray-300 px-2 py-1 w-12 text-xs font-semibold text-gray-600"></th>
+              <th className="border border-gray-300 px-2 py-1 w-12 text-xs font-semibold text-gray-600 bg-gray-200"></th>
               {Array.from({ length: COLS }, (_, i) => (
-                <th key={i} className="border border-gray-300 px-2 py-1 w-24 text-xs font-semibold text-gray-600">
+                <th key={i} className="border border-gray-300 px-2 py-1 w-24 text-xs font-semibold text-gray-600 bg-gray-200">
                   {String.fromCharCode(65 + i)}
                 </th>
               ))}
@@ -266,7 +375,7 @@ export default function SheetApp({ onBack }: SheetAppProps) {
           <tbody>
             {Array.from({ length: ROWS }, (_, row) => (
               <tr key={row}>
-                <td className="border border-gray-300 px-2 py-1 text-xs font-semibold text-gray-600 text-center bg-gray-50">
+                <td className="border border-gray-300 px-2 py-1 text-xs font-semibold text-gray-600 text-center bg-gray-200">
                   {row + 1}
                 </td>
                 {Array.from({ length: COLS }, (_, col) => {
@@ -278,7 +387,7 @@ export default function SheetApp({ onBack }: SheetAppProps) {
                       key={col}
                       onClick={() => handleCellClick(key)}
                       className={`border border-gray-300 px-2 py-1 text-sm cursor-cell min-w-[100px] ${
-                        isSelected ? 'bg-blue-50 ring-2 ring-blue-500 ring-inset' : 'hover:bg-gray-50'
+                        isSelected ? 'bg-blue-50 ring-2 ring-[#217346] ring-inset' : 'hover:bg-gray-50'
                       }`}
                     >
                       {isSelected ? (
@@ -304,13 +413,21 @@ export default function SheetApp({ onBack }: SheetAppProps) {
       </div>
 
       {/* Status Bar */}
-      <div className="bg-green-600 text-white px-4 py-1.5 flex items-center justify-between text-xs">
+      <div className="bg-[#217346] text-white px-4 py-1.5 flex items-center justify-between text-xs">
         <div className="flex items-center gap-4">
-          <span><i className="fas fa-table mr-1"></i> {fileName}</span>
-          <span><i className="fas fa-th mr-1"></i> {ROWS} × {COLS} cellules</span>
+          <span>Prêt</span>
+          <span>Calculé</span>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-white/70">Formules: =SUM(), =AVG(), =A1+B1</span>
+          <span>{ROWS} lignes × {COLS} colonnes</span>
+          <div className="flex items-center gap-2">
+            <button className="hover:bg-white/10 p-1 rounded transition">
+              <i className="fas fa-th"></i>
+            </button>
+            <button className="hover:bg-white/10 p-1 rounded transition">
+              <i className="fas fa-list"></i>
+            </button>
+          </div>
         </div>
       </div>
 

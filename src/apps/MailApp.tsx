@@ -37,7 +37,6 @@ export default function MailApp({ onBack }: MailAppProps) {
   const [showContactForm, setShowContactForm] = useState(false);
   const [newContact, setNewContact] = useState({ name: '', email: '' });
 
-  // Charger les données au démarrage
   useEffect(() => {
     const savedEmails = localStorage.getItem('mailrapide_emails');
     const savedContacts = localStorage.getItem('mailrapide_contacts');
@@ -45,7 +44,6 @@ export default function MailApp({ onBack }: MailAppProps) {
     if (savedEmails) {
       setEmails(JSON.parse(savedEmails));
     } else {
-      // Emails de démonstration
       const demoEmails: Email[] = [
         {
           id: '1',
@@ -78,7 +76,6 @@ export default function MailApp({ onBack }: MailAppProps) {
     }
   }, []);
 
-  // Sauvegarder automatiquement
   useEffect(() => {
     localStorage.setItem('mailrapide_emails', JSON.stringify(emails));
   }, [emails]);
@@ -186,11 +183,6 @@ export default function MailApp({ onBack }: MailAppProps) {
     }
   };
 
-  const handleRestoreEmail = (emailId: string) => {
-    setEmails(emails.map(e => e.id === emailId ? { ...e, folder: 'inbox' } : e));
-    showToast('Email restauré', 'success');
-  };
-
   const handleToggleStar = (emailId: string) => {
     setEmails(emails.map(e => e.id === emailId ? { ...e, starred: !e.starred } : e));
   };
@@ -238,57 +230,63 @@ export default function MailApp({ onBack }: MailAppProps) {
 
   return (
     <div className="flex flex-col h-screen bg-gray-100">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 px-4 py-2 flex items-center gap-3 shadow-sm">
-        <button onClick={onBack} className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded transition">
-          <i className="fas fa-arrow-left mr-1"></i> Retour
-        </button>
-        <div className="w-px h-6 bg-gray-200"></div>
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-red-600 rounded flex items-center justify-center">
-            <i className="fas fa-envelope text-white"></i>
+      {/* Title Bar - Outlook Style */}
+      <div className="bg-[#0078d4] text-white px-4 py-2 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <button onClick={onBack} className="hover:bg-white/10 p-1 rounded transition">
+            <i className="fas fa-arrow-left"></i>
+          </button>
+          <div className="w-6 h-6 bg-white/20 rounded flex items-center justify-center">
+            <i className="fas fa-envelope text-sm"></i>
           </div>
-          <h1 className="text-lg font-medium text-gray-700">MailRapide</h1>
+          <span className="text-sm font-medium">Outlook - OfficeRapide</span>
         </div>
-
-        <div className="ml-auto flex items-center gap-2">
-          <button
+        <div className="flex items-center gap-2">
+          <button 
             onClick={() => { setComposeData({ to: '', subject: '', body: '' }); setCurrentView('compose'); }}
-            className="px-4 py-1.5 text-sm bg-red-600 text-white hover:bg-red-700 rounded transition"
+            className="bg-white text-[#0078d4] px-4 py-1 rounded font-medium hover:bg-gray-100 transition text-sm"
           >
             <i className="fas fa-pen mr-1"></i> Nouveau message
           </button>
-          <button
-            onClick={() => setCurrentView('contacts')}
-            className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded transition"
-          >
-            <i className="fas fa-address-book mr-1"></i> Contacts
-          </button>
         </div>
-      </header>
+      </div>
 
-      {/* Main Content */}
+      {/* Search Bar */}
+      <div className="bg-white border-b border-gray-200 px-4 py-3">
+        <div className="relative max-w-2xl mx-auto">
+          <i className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Rechercher dans les emails..."
+            className="w-full pl-12 pr-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-[#0078d4] focus:border-transparent"
+          />
+        </div>
+      </div>
+
+      {/* Main Content - Three Pane Layout */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar */}
-        <div className="w-56 bg-white border-r border-gray-200 flex flex-col">
+        {/* Folders Pane */}
+        <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
           <div className="p-4 space-y-1">
             {folders.map(folder => (
               <button
                 key={folder.id}
                 onClick={() => { setCurrentFolder(folder.id); setCurrentView('list'); }}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition ${
+                className={`w-full flex items-center justify-between px-4 py-2.5 rounded-lg text-sm transition ${
                   currentFolder === folder.id && currentView === 'list'
-                    ? 'bg-red-50 text-red-600 font-semibold'
+                    ? 'bg-[#0078d4] text-white font-semibold'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <i className={folder.icon}></i>
                   <span>{folder.name}</span>
                 </div>
                 {folder.count > 0 && (
                   <span className={`px-2 py-0.5 rounded-full text-xs ${
-                    currentFolder === folder.id ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-600'
+                    currentFolder === folder.id ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-600'
                   }`}>
                     {folder.count}
                   </span>
@@ -296,28 +294,31 @@ export default function MailApp({ onBack }: MailAppProps) {
               </button>
             ))}
           </div>
+          <div className="mt-auto p-4 border-t border-gray-200">
+            <button
+              onClick={() => setCurrentView('contacts')}
+              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-gray-700 hover:bg-gray-100 transition"
+            >
+              <i className="fas fa-address-book"></i>
+              <span>Contacts ({contacts.length})</span>
+            </button>
+          </div>
         </div>
 
         {/* Email List / Content */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-hidden bg-white">
           {currentView === 'list' && (
             <>
-              {/* Search Bar */}
-              <div className="bg-white border-b border-gray-200 px-4 py-3">
-                <div className="relative">
-                  <i className="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Rechercher dans les emails..."
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                  />
-                </div>
+              {/* Email List Header */}
+              <div className="border-b border-gray-200 px-6 py-3 flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-800">
+                  {folders.find(f => f.id === currentFolder)?.name}
+                </h2>
+                <span className="text-sm text-gray-500">{filteredEmails.length} message{filteredEmails.length !== 1 ? 's' : ''}</span>
               </div>
 
               {/* Email List */}
-              <div className="flex-1 overflow-y-auto bg-white">
+              <div className="flex-1 overflow-y-auto">
                 {filteredEmails.length === 0 ? (
                   <div className="text-center py-12 text-gray-400">
                     <i className="fas fa-inbox text-5xl mb-4"></i>
@@ -329,7 +330,7 @@ export default function MailApp({ onBack }: MailAppProps) {
                       <div
                         key={email.id}
                         onClick={() => handleEmailClick(email)}
-                        className={`px-4 py-3 cursor-pointer hover:bg-gray-50 transition ${
+                        className={`px-6 py-4 cursor-pointer hover:bg-gray-50 transition ${
                           !email.read ? 'bg-blue-50' : ''
                         }`}
                       >
@@ -364,7 +365,7 @@ export default function MailApp({ onBack }: MailAppProps) {
           )}
 
           {currentView === 'read' && selectedEmail && (
-            <div className="flex-1 overflow-y-auto bg-white p-6">
+            <div className="flex-1 overflow-y-auto p-8">
               <div className="max-w-3xl mx-auto">
                 <div className="mb-6">
                   <h2 className="text-2xl font-bold text-gray-900 mb-4">{selectedEmail.subject}</h2>
@@ -381,13 +382,13 @@ export default function MailApp({ onBack }: MailAppProps) {
                     <div className="flex gap-2">
                       <button
                         onClick={handleReply}
-                        className="px-3 py-1.5 text-sm bg-red-600 text-white hover:bg-red-700 rounded transition"
+                        className="px-4 py-2 bg-[#0078d4] text-white hover:bg-[#0066b8] rounded transition text-sm"
                       >
                         <i className="fas fa-reply mr-1"></i> Répondre
                       </button>
                       <button
                         onClick={() => handleDeleteEmail(selectedEmail.id)}
-                        className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded transition"
+                        className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded transition text-sm"
                       >
                         <i className="fas fa-trash mr-1"></i> Supprimer
                       </button>
@@ -402,7 +403,7 @@ export default function MailApp({ onBack }: MailAppProps) {
           )}
 
           {currentView === 'compose' && (
-            <div className="flex-1 overflow-y-auto bg-white p-6">
+            <div className="flex-1 overflow-y-auto p-8">
               <div className="max-w-3xl mx-auto">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Nouveau message</h2>
                 <div className="space-y-4">
@@ -413,7 +414,7 @@ export default function MailApp({ onBack }: MailAppProps) {
                       value={composeData.to}
                       onChange={(e) => setComposeData({ ...composeData, to: e.target.value })}
                       placeholder="destinataire@example.com"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0078d4] focus:border-transparent"
                     />
                   </div>
                   <div>
@@ -423,7 +424,7 @@ export default function MailApp({ onBack }: MailAppProps) {
                       value={composeData.subject}
                       onChange={(e) => setComposeData({ ...composeData, subject: e.target.value })}
                       placeholder="Objet du message"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0078d4] focus:border-transparent"
                     />
                   </div>
                   <div>
@@ -433,13 +434,13 @@ export default function MailApp({ onBack }: MailAppProps) {
                       onChange={(e) => setComposeData({ ...composeData, body: e.target.value })}
                       placeholder="Rédigez votre message..."
                       rows={15}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0078d4] focus:border-transparent resize-none"
                     />
                   </div>
                   <div className="flex gap-2">
                     <button
                       onClick={handleSendEmail}
-                      className="px-6 py-2 bg-red-600 text-white hover:bg-red-700 rounded-lg transition"
+                      className="px-6 py-2 bg-[#0078d4] text-white hover:bg-[#0066b8] rounded-lg transition"
                     >
                       <i className="fas fa-paper-plane mr-2"></i> Envoyer
                     </button>
@@ -462,20 +463,20 @@ export default function MailApp({ onBack }: MailAppProps) {
           )}
 
           {currentView === 'contacts' && (
-            <div className="flex-1 overflow-y-auto bg-white p-6">
+            <div className="flex-1 overflow-y-auto p-8">
               <div className="max-w-3xl mx-auto">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-bold text-gray-900">Contacts</h2>
                   <button
                     onClick={() => setShowContactForm(true)}
-                    className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded-lg transition"
+                    className="px-4 py-2 bg-[#0078d4] text-white hover:bg-[#0066b8] rounded-lg transition"
                   >
                     <i className="fas fa-plus mr-2"></i> Ajouter un contact
                   </button>
                 </div>
 
                 {showContactForm && (
-                  <div className="bg-gray-50 p-4 rounded-lg mb-6">
+                  <div className="bg-gray-50 p-6 rounded-lg mb-6">
                     <h3 className="font-semibold text-gray-900 mb-3">Nouveau contact</h3>
                     <div className="space-y-3">
                       <input
@@ -483,19 +484,19 @@ export default function MailApp({ onBack }: MailAppProps) {
                         value={newContact.name}
                         onChange={(e) => setNewContact({ ...newContact, name: e.target.value })}
                         placeholder="Nom"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0078d4] focus:border-transparent"
                       />
                       <input
                         type="email"
                         value={newContact.email}
                         onChange={(e) => setNewContact({ ...newContact, email: e.target.value })}
                         placeholder="Email"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#0078d4] focus:border-transparent"
                       />
                       <div className="flex gap-2">
                         <button
                           onClick={handleAddContact}
-                          className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded-lg transition"
+                          className="px-4 py-2 bg-[#0078d4] text-white hover:bg-[#0066b8] rounded-lg transition"
                         >
                           Ajouter
                         </button>
@@ -518,7 +519,7 @@ export default function MailApp({ onBack }: MailAppProps) {
                 ) : (
                   <div className="space-y-2">
                     {contacts.map(contact => (
-                      <div key={contact.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                      <div key={contact.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
                         <div>
                           <div className="font-semibold text-gray-900">{contact.name}</div>
                           <div className="text-sm text-gray-600">{contact.email}</div>
@@ -529,13 +530,13 @@ export default function MailApp({ onBack }: MailAppProps) {
                               setComposeData({ to: contact.email, subject: '', body: '' });
                               setCurrentView('compose');
                             }}
-                            className="px-3 py-1 text-sm bg-red-600 text-white hover:bg-red-700 rounded transition"
+                            className="px-4 py-2 bg-[#0078d4] text-white hover:bg-[#0066b8] rounded transition text-sm"
                           >
                             <i className="fas fa-envelope mr-1"></i> Email
                           </button>
                           <button
                             onClick={() => handleDeleteContact(contact.id)}
-                            className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded transition"
+                            className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded transition text-sm"
                           >
                             <i className="fas fa-trash"></i>
                           </button>
@@ -551,11 +552,10 @@ export default function MailApp({ onBack }: MailAppProps) {
       </div>
 
       {/* Status Bar */}
-      <div className="bg-red-600 text-white px-4 py-1.5 flex items-center justify-between text-xs">
+      <div className="bg-[#0078d4] text-white px-4 py-1.5 flex items-center justify-between text-xs">
         <div className="flex items-center gap-4">
-          <span><i className="fas fa-envelope mr-1"></i> MailRapide</span>
-          <span><i className="fas fa-inbox mr-1"></i> {unreadCount} non lu{unreadCount !== 1 ? 's' : ''}</span>
-          <span><i className="fas fa-address-book mr-1"></i> {contacts.length} contact{contacts.length !== 1 ? 's' : ''}</span>
+          <span>{unreadCount} non lu{unreadCount !== 1 ? 's' : ''}</span>
+          <span>{contacts.length} contact{contacts.length !== 1 ? 's' : ''}</span>
         </div>
         <div className="flex items-center gap-4">
           <span>{new Date().toLocaleDateString('fr-FR')}</span>

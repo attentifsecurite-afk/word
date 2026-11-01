@@ -1,219 +1,311 @@
-# 🏢 OfficeRapide - Suite Bureautique Complète
+# 🏢 OfficeRapide
 
-Une suite bureautique complète et professionnelle inspirée de Microsoft Office, entièrement développée en React avec TypeScript et Tailwind CSS.
+<div align="center">
 
-## 📦 Applications incluses
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![React](https://img.shields.io/badge/React-18-61dafb)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6)
+![Tailwind](https://img.shields.io/badge/Tailwind-3-38bdf8)
 
-### 📝 WordRapide - Traitement de texte
-- **Édition riche** : Gras, italique, souligné, couleurs, polices
-- **Mise en page** : Alignement, listes, tableaux
-- **Sauvegarde locale** : Gestion de plusieurs documents
-- **Export** : HTML, TXT
-- **Impression** : Fenêtre d'impression dédiée
-- **Compteur** : Mots et caractères en temps réel
+**Suite bureautique professionnelle inspirée de Microsoft Office**
 
-### 📊 SheetRapide - Tableur
-- **Grille complète** : 50 lignes × 26 colonnes (A-Z)
-- **Formules** : SUM(), AVG(), références cellulaires
-- **Calculs** : Opérations arithmétiques (+, -, *, /)
-- **Barre de formule** : Édition directe des formules
-- **Export CSV** : Compatible Excel, Google Sheets
-- **Sauvegarde locale** : Persistance des données
+[Installation](#installation) • [Utilisation](#utilisation) • [Fonctionnalités](#fonctionnalités) • [Documentation](#documentation)
 
-### 📽️ SlideRapide - Présentations
-- **Diapositives multiples** : Ajout/suppression illimitées
-- **Thèmes** : 7 dégradés de couleurs
-- **Mode présentation** : Plein écran avec navigation
-- **Édition en direct** : Titre et contenu modifiables
-- **Aperçu miniature** : Navigation visuelle
-- **Export HTML** : Présentation autonome
+</div>
 
-## 🎯 Fonctionnalités communes
+---
 
-### 💾 Gestion des fichiers
-- Sauvegarde locale (localStorage)
-- Chargement de documents
-- Export dans différents formats
-- Noms de fichiers éditables
+## 📦 Applications
 
-### 🎨 Interface utilisateur
-- Design moderne et responsive
-- Barres d'outils intuitives
-- Notifications toast
-- Barres de statut informatives
-- Navigation fluide entre applications
+### 📝 Word - Traitement de Texte
+<div align="center">
+<img src="https://img.shields.io/badge/Word-2b579a?style=for-the-badge&logo=microsoft-word&logoColor=white" />
+</div>
 
-### ⚡ Performance
-- Démarrage instantané
-- 100% client-side
-- Pas de serveur requis
-- Fonctionne hors-ligne
+Traitement de texte complet avec ruban professionnel, mise en forme riche, insertion d'images et de tableaux, sauvegarde locale et export HTML/TXT.
 
-## 🚀 Installation et utilisation
+### 📊 Excel - Tableur
+<div align="center">
+<img src="https://img.shields.io/badge/Excel-217346?style=for-the-badge&logo=microsoft-excel&logoColor=white" />
+</div>
 
-### Développement local
+Tableur puissant avec formules (SUM, AVG), grille 50×26, barre de formule, export CSV et navigation clavier.
+
+### 📽️ PowerPoint - Présentations
+<div align="center">
+<img src="https://img.shields.io/badge/PowerPoint-d24726?style=for-the-badge&logo=microsoft-powerpoint&logoColor=white" />
+</div>
+
+Créateur de présentations avec 7 thèmes, mode diaporama, édition en direct et export HTML autonome.
+
+### 📧 Outlook - Messagerie
+<div align="center">
+<img src="https://img.shields.io/badge/Outlook-0078d4?style=for-the-badge&logo=microsoft-outlook&logoColor=white" />
+</div>
+
+Client de messagerie complet avec interface 3 volets, gestion des contacts, recherche avancée et sauvegarde automatique.
+
+---
+
+## ✨ Fonctionnalités
+
+### 🎨 Design Microsoft Office Authentique
+- ✅ Rubans complets avec onglets et groupes
+- ✅ Barres de titre colorées par application
+- ✅ Icônes Font Awesome professionnelles
+- ✅ Barres de statut contextuelles
+- ✅ Typographie Calibri (police Office)
+
+### 💾 Stockage Local
+- ✅ Sauvegarde automatique dans localStorage
+- ✅ 100% privé - pas de serveur
+- ✅ Fonctionne hors-ligne
+- ✅ Persistance des données
+
+### 🚀 Performance
+- ✅ Démarrage instantané
+- ✅ Build ultra-rapide avec Vite
+- ✅ Bundle optimisé (~200KB)
+- ✅ 100% client-side
+
+### 📱 Responsive
+- ✅ Interface adaptative
+- ✅ Navigation fluide
+- ✅ Expérience desktop optimisée
+
+---
+
+## 🚀 Installation
+
+### Développement Local
 
 ```bash
+# Cloner le projet
+git clone https://github.com/votre-username/officerapide.git
+cd officerapide
+
 # Installer les dépendances
 npm install
 
 # Lancer le serveur de développement
 npm run dev
 
+# Ouvrir http://localhost:5173
+```
+
+### Production
+
+```bash
 # Builder pour la production
 npm run build
+
+# Le dossier dist/ contient l'application prête à déployer
 ```
 
 ### Déploiement
 
-Le projet peut être déployé sur n'importe quel hébergeur statique :
-- Vercel
-- Netlify
-- GitHub Pages
-- Tout serveur web statique
-
-## 📁 Structure du projet
-
-```
-src/
-├── App.tsx                 # Routeur principal
-├── apps/
-│   ├── Home.tsx           # Page d'accueil
-│   ├── WordApp.tsx        # Traitement de texte
-│   ├── SheetApp.tsx       # Tableur
-│   └── SlideApp.tsx       # Présentations
-├── components/
-│   ├── Toolbar.tsx        # Barre d'outils Word
-│   ├── PageArea.tsx       # Zone d'édition
-│   ├── StatusBar.tsx      # Barre de statut
-│   ├── Toast.tsx          # Notifications
-│   ├── DocumentList.tsx   # Liste des documents
-│   └── AIAssistant.tsx    # Assistant IA (optionnel)
-├── utils/
-│   └── DocumentManager.ts # Gestion des documents
-└── styles/
-    └── editor.css         # Styles de l'éditeur
+**Vercel**
+```bash
+npm install -g vercel
+vercel
 ```
 
-## 🎓 Guide d'utilisation
-
-### WordRapide
-
-1. **Créer un document** : Cliquez sur "Nouveau"
-2. **Écrire** : Cliquez dans la zone de texte et tapez
-3. **Mettre en forme** : Utilisez la barre d'outils
-4. **Sauvegarder** : Cliquez sur "Sauvegarder"
-5. **Charger** : Cliquez sur "Charger" pour voir vos documents
-6. **Exporter** : Menu "Exporter" → HTML ou TXT
-
-### SheetRapide
-
-1. **Sélectionner une cellule** : Cliquez dessus
-2. **Entrer une valeur** : Tapez directement ou dans la barre de formule
-3. **Formules** :
-   - `=SUM(A1:A10)` : Somme de A1 à A10
-   - `=AVG(B1:B5)` : Moyenne de B1 à B5
-   - `=A1+B1` : Addition
-   - `=A1*B1` : Multiplication
-4. **Navigation** : Entrée (bas), Tab (droite)
-5. **Exporter** : Cliquez sur "Exporter CSV"
-
-### SlideRapide
-
-1. **Ajouter une diapositive** : Cliquez sur "Ajouter"
-2. **Modifier** : Cliquez sur le titre ou le contenu
-3. **Changer le thème** : Sélectionnez un arrière-plan
-4. **Naviguer** : Cliquez sur les miniatures à gauche
-5. **Présenter** : Cliquez sur "Présenter" pour le mode plein écran
-6. **Navigation présentation** : Flèches gauche/droite ou boutons
-
-## 🔧 Technologies utilisées
-
-- **React 18** : Framework UI
-- **TypeScript** : Typage statique
-- **Tailwind CSS** : Styling utility-first
-- **Vite** : Build tool ultra-rapide
-- **Font Awesome** : Icônes
-
-## 📊 Fonctionnalités avancées
-
-### Formules du tableur
-
-Le tableur supporte :
-- **Fonctions** : SUM(), AVG()
-- **Références** : A1, B2, etc.
-- **Opérations** : +, -, *, /
-- **Plages** : A1:A10, B2:C5
-
-### Thèmes de présentation
-
-7 thèmes prédéfinis :
-1. Bleu → Violet
-2. Vert → Turquoise
-3. Orange → Rouge
-4. Rose → Rouge rosé
-5. Indigo → Bleu
-6. Gris foncé → Noir
-7. Blanc → Gris clair
-
-## 🎨 Personnalisation
-
-### Ajouter un thème de présentation
-
-Modifiez `src/apps/SlideApp.tsx` :
-
-```typescript
-const backgrounds = [
-  // ... thèmes existants
-  'from-yellow-500 to-orange-600', // Nouveau thème
-];
+**Netlify**
+```bash
+npm install -g netlify-cli
+netlify deploy --prod
 ```
 
-### Ajouter une fonction au tableur
-
-Modifiez `src/apps/SheetApp.tsx` dans `evaluateFormula()` :
-
-```typescript
-// Exemple : fonction MAX
-const maxMatch = expr.match(/^MAX\(([A-Z])(\d+):([A-Z])(\d+)\)$/);
-if (maxMatch) {
-  // Implémentation...
-}
+**GitHub Pages**
+```bash
+npm run build
+# Uploader le dossier dist/ sur la branche gh-pages
 ```
-
-## 🐛 Problèmes connus
-
-- Les formules complexes peuvent être lentes sur de grandes plages
-- Pas d'annulation/annulation dans le tableur (à venir)
-- Pas d'import de fichiers (à venir)
-
-## 🚀 Améliorations futures
-
-- [ ] Assistant IA intégré (Gemini)
-- [ ] Collaboration en temps réel
-- [ ] Import/Export Office (docx, xlsx, pptx)
-- [ ] Mode hors-ligne avancé (PWA)
-- [ ] Thèmes personnalisables
-- [ ] Historique des versions
-- [ ] Templates de documents
-- [ ] Graphiques dans le tableur
-- [ ] Animations dans les présentations
-
-## 📝 Licence
-
-MIT License - Libre d'utilisation
-
-## 🤝 Contribution
-
-Les contributions sont les bienvenues ! N'hésitez pas à :
-- Signaler des bugs
-- Proposer des fonctionnalités
-- Soumettre des pull requests
-
-## 📧 Contact
-
-Pour toute question ou suggestion, n'hésitez pas à ouvrir une issue sur GitHub.
 
 ---
 
-**OfficeRapide** - Votre suite bureautique complète, rapide et gratuite ! 🚀
+## 📖 Utilisation
+
+### Page d'Accueil
+1. Cliquez sur une application (Word, Excel, PowerPoint, Outlook)
+2. Accédez aux documents récents
+3. Utilisez les actions rapides
+
+### Word
+- **Écrire** : cliquez dans la zone de texte
+- **Formater** : utilisez le ruban (Accueil, Insertion, etc.)
+- **Sauvegarder** : Fichier → Sauvegarder
+- **Charger** : Fichier → Ouvrir
+- **Exporter** : Fichier → Exporter (HTML/TXT)
+
+### Excel
+- **Sélectionner** : cliquez sur une cellule
+- **Formules** : commencez par `=` (ex: `=SUM(A1:A10)`)
+- **Navigation** : Entrée (bas), Tab (droite)
+- **Exporter** : bouton de téléchargement CSV
+
+### PowerPoint
+- **Ajouter** : Accueil → Nouvelle diapo
+- **Modifier** : cliquez sur titre/contenu
+- **Thème** : Création → sélectionnez un thème
+- **Présenter** : bouton Play
+- **Exporter** : bouton de téléchargement HTML
+
+### Outlook
+- **Lire** : cliquez sur un email
+- **Répondre** : bouton Répondre
+- **Nouveau** : bouton "Nouveau message"
+- **Rechercher** : barre de recherche
+- **Contacts** : bouton Contacts
+
+---
+
+## 🎨 Design System
+
+### Couleurs Officielles
+| Application | Couleur | Hex |
+|------------|---------|-----|
+| Word | Bleu | `#2b579a` |
+| Excel | Vert | `#217346` |
+| PowerPoint | Orange | `#d24726` |
+| Outlook | Bleu clair | `#0078d4` |
+
+### Typographie
+- **Police** : Calibri, Arial, sans-serif
+- **Taille de base** : 16px
+- **Interlignage** : 1.8
+
+### Composants
+- **Ruban** : onglets + groupes de commandes
+- **Boutons** : icônes Font Awesome + tooltips
+- **Barres** : titre colorée + statut contextuelle
+- **Zones** : édition avec marges professionnelles
+
+---
+
+## 📁 Structure
+
+```
+officerapide/
+├── src/
+│   ├── App.tsx              # Routeur principal
+│   ├── apps/
+│   │   ├── Home.tsx         # Page d'accueil
+│   │   ├── WordApp.tsx      # Word
+│   │   ├── SheetApp.tsx     # Excel
+│   │   ├── SlideApp.tsx     # PowerPoint
+│   │   └── MailApp.tsx      # Outlook
+│   ├── components/
+│   │   ├── Toast.tsx        # Notifications
+│   │   └── DocumentList.tsx # Liste documents
+│   ├── utils/
+│   │   └── DocumentManager.ts
+│   └── styles/
+│       └── editor.css
+├── public/
+│   ├── icon.svg
+│   ├── manifest.json
+│   └── sw.js
+└── index.html
+```
+
+---
+
+## 🔧 Technologies
+
+- **React 18** - Framework UI
+- **TypeScript 5** - Typage statique
+- **Tailwind CSS 3** - Styling
+- **Vite 5** - Build tool
+- **Font Awesome 6** - Icônes
+- **localStorage** - Stockage
+
+---
+
+## 📊 Stats
+
+```
+Build:        ~200KB gzipped
+Modules:      36
+Components:   10
+Apps:         4
+Languages:    TypeScript, CSS
+License:      MIT
+```
+
+---
+
+## 🐛 Bugs Connus
+
+- Formules Excel complexes peuvent être lentes
+- Pas d'annulation/annulation (Ctrl+Z)
+- Pas d'import de fichiers Office
+- Emails simulés (pas d'envoi réel)
+
+---
+
+## 🚀 Roadmap
+
+### v1.1 (Prochainement)
+- [ ] Mode sombre
+- [ ] Raccourcis clavier (Ctrl+S, Ctrl+Z)
+- [ ] Templates de documents
+- [ ] Annulation/Annulation
+
+### v1.2
+- [ ] Import/Export Office (docx, xlsx, pptx)
+- [ ] Graphiques Excel
+- [ ] Animations PowerPoint
+- [ ] Pièces jointes Outlook
+
+### v2.0
+- [ ] Synchronisation cloud
+- [ ] Collaboration temps réel
+- [ ] Assistant IA
+- [ ] Applications mobiles
+
+---
+
+## 🤝 Contribution
+
+Les contributions sont les bienvenues !
+
+1. Fork le projet
+2. Créez une branche (`git checkout -b feature/AmazingFeature`)
+3. Commit (`git commit -m 'Add AmazingFeature'`)
+4. Push (`git push origin feature/AmazingFeature`)
+5. Ouvrez une Pull Request
+
+---
+
+## 📝 Licence
+
+MIT License - Voir [LICENSE](LICENSE) pour plus de détails
+
+---
+
+## 📧 Contact
+
+- **GitHub Issues** : [Signaler un bug](https://github.com/votre-username/officerapide/issues)
+- **Discussions** : [Poser une question](https://github.com/votre-username/officerapide/discussions)
+
+---
+
+## 🙏 Remerciements
+
+- **Microsoft** - Inspiration du design
+- **React Team** - Framework incroyable
+- **Tailwind Labs** - CSS utility-first
+- **Font Awesome** - Icônes professionnelles
+- **Vite Team** - Build tool ultra-rapide
+
+---
+
+<div align="center">
+
+**Fait avec ❤️ pour la productivité**
+
+[⭐ Star this repo](https://github.com/votre-username/officerapide) • [🐛 Report Bug](https://github.com/votre-username/officerapide/issues) • [💡 Request Feature](https://github.com/votre-username/officerapide/issues)
+
+</div>
