@@ -1,13 +1,13 @@
 {
-  "name": "WordRapide - Éditeur de Texte",
-  "short_name": "WordRapide",
-  "description": "Éditeur de texte rapide et puissant, installable sur Mac et Windows",
+  "name": "OfficeRapide - Suite Bureautique Complète",
+  "short_name": "OfficeRapide",
+  "description": "Suite bureautique complète avec Word, Excel, PowerPoint et Outlook",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f3f4f6",
-  "theme_color": "#2563eb",
+  "theme_color": "#2b579a",
   "orientation": "any",
-  "categories": ["productivity", "utilities"],
+  "categories": ["productivity", "utilities", "business"],
   "lang": "fr-FR",
   "icons": [
     {
@@ -19,17 +19,31 @@
   ],
   "shortcuts": [
     {
-      "name": "Nouveau document",
-      "short_name": "Nouveau",
-      "description": "Créer un nouveau document",
-      "url": "/?action=new",
+      "name": "Word - Traitement de texte",
+      "short_name": "Word",
+      "description": "Ouvrir Word",
+      "url": "/?app=word",
       "icons": [{ "src": "/icon.svg", "sizes": "any" }]
     },
     {
-      "name": "Installer WordRapide",
-      "short_name": "Installer",
-      "description": "Installer l'application sur votre ordinateur",
-      "url": "/install.html",
+      "name": "Excel - Tableur",
+      "short_name": "Excel",
+      "description": "Ouvrir Excel",
+      "url": "/?app=sheet",
+      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "PowerPoint - Présentations",
+      "short_name": "PowerPoint",
+      "description": "Ouvrir PowerPoint",
+      "url": "/?app=slide",
+      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Outlook - Messagerie",
+      "short_name": "Outlook",
+      "description": "Ouvrir Outlook",
+      "url": "/?app=mail",
       "icons": [{ "src": "/icon.svg", "sizes": "any" }]
     }
   ],
@@ -38,7 +52,8 @@
       "action": "/",
       "accept": {
         "text/html": [".html", ".htm"],
-        "text/plain": [".txt", ".md"]
+        "text/plain": [".txt", ".md"],
+        "text/csv": [".csv"]
       }
     }
   ]

@@ -1,9 +1,10 @@
-const CACHE_NAME = 'wordrapide-v1';
+const CACHE_NAME = 'officerapide-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/icon.svg',
-  '/manifest.json'
+  '/manifest.json',
+  '/install.html'
 ];
 
 // Install event - cache essential assets
