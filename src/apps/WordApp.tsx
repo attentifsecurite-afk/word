@@ -3,6 +3,10 @@ import ToastContainer, { showToast } from '../components/Toast';
 import { DocumentManager, SavedDocument } from '../utils/DocumentManager';
 import DocumentList from '../components/DocumentList';
 import { importTextFile, exportHTML, exportText, isLocalStorageAvailable } from '../utils/FileHandler';
+import TemplateSelector from '../components/TemplateSelector';
+import ThemeToggle from '../components/ThemeToggle';
+import { DocumentTemplate } from '../utils/templates';
+import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 
 interface WordAppProps {
   onBack: () => void;
@@ -15,6 +19,7 @@ export default function WordApp({ onBack, onOpenStorage }: WordAppProps) {
   const [fileName, setFileName] = useState('Document1');
   const [isEditing, setIsEditing] = useState(false);
   const [showDocumentList, setShowDocumentList] = useState(false);
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
   const [activeTab, setActiveTab] = useState('home');
   const editorRef = useRef<HTMLDivElement>(null);
 
@@ -123,6 +128,37 @@ export default function WordApp({ onBack, onOpenStorage }: WordAppProps) {
     }
   };
 
+  const handleTemplateSelect = (template: DocumentTemplate) => {
+    if (editorRef.current) {
+      editorRef.current.innerHTML = template.content;
+      setFileName(template.name);
+      handleInput();
+      showToast(`Modèle "${template.name}" appliqué`, 'success');
+    }
+  };
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts([
+    {
+      key: 's',
+      ctrl: true,
+      action: handleSaveLocal,
+      description: 'Sauvegarder'
+    },
+    {
+      key: 'p',
+      ctrl: true,
+      action: handlePrint,
+      description: 'Imprimer'
+    },
+    {
+      key: 'n',
+      ctrl: true,
+      action: handleNewDocument,
+      description: 'Nouveau document'
+    }
+  ]);
+
   const tabs = [
     { id: 'file', label: 'Fichier', icon: 'fas fa-file' },
     { id: 'home', label: 'Accueil', icon: 'fas fa-home' },
@@ -161,12 +197,13 @@ export default function WordApp({ onBack, onOpenStorage }: WordAppProps) {
           )}
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={handleSaveLocal} className="hover:bg-white/10 p-1.5 rounded transition" title="Sauvegarder">
+          <button onClick={handleSaveLocal} className="hover:bg-white/10 p-1.5 rounded transition" title="Sauvegarder (Ctrl+S)">
             <i className="fas fa-save text-sm"></i>
           </button>
-          <button onClick={handlePrint} className="hover:bg-white/10 p-1.5 rounded transition" title="Imprimer">
+          <button onClick={handlePrint} className="hover:bg-white/10 p-1.5 rounded transition" title="Imprimer (Ctrl+P)">
             <i className="fas fa-print text-sm"></i>
           </button>
+          <ThemeToggle />
           {onOpenStorage && (
             <button onClick={onOpenStorage} className="hover:bg-white/10 p-1.5 rounded transition" title="Gestionnaire de stockage">
               <i className="fas fa-database text-sm"></i>
@@ -335,27 +372,31 @@ export default function WordApp({ onBack, onOpenStorage }: WordAppProps) {
 
         {activeTab === 'file' && (
           <div className="flex items-center gap-4">
-            <button onClick={handleNewDocument} className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 rounded transition">
+            <button onClick={handleNewDocument} className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition">
               <i className="fas fa-file-alt text-xl text-[#2b579a]"></i>
               <span className="text-xs">Nouveau</span>
             </button>
-            <button onClick={handleSaveLocal} className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 rounded transition">
+            <button onClick={() => setShowTemplateSelector(true)} className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition">
+              <i className="fas fa-copy text-xl text-[#2b579a]"></i>
+              <span className="text-xs">Modèles</span>
+            </button>
+            <button onClick={handleSaveLocal} className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition">
               <i className="fas fa-save text-xl text-[#2b579a]"></i>
               <span className="text-xs">Sauvegarder</span>
             </button>
-            <button onClick={() => setShowDocumentList(true)} className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 rounded transition">
+            <button onClick={() => setShowDocumentList(true)} className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition">
               <i className="fas fa-folder-open text-xl text-[#2b579a]"></i>
               <span className="text-xs">Ouvrir</span>
             </button>
-            <button onClick={handleImport} className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 rounded transition">
+            <button onClick={handleImport} className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition">
               <i className="fas fa-upload text-xl text-[#2b579a]"></i>
               <span className="text-xs">Importer</span>
             </button>
-            <button onClick={handlePrint} className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 rounded transition">
+            <button onClick={handlePrint} className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition">
               <i className="fas fa-print text-xl text-[#2b579a]"></i>
               <span className="text-xs">Imprimer</span>
             </button>
-            <button onClick={handleExportHTML} className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 rounded transition">
+            <button onClick={handleExportHTML} className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition">
               <i className="fas fa-download text-xl text-[#2b579a]"></i>
               <span className="text-xs">Exporter</span>
             </button>
@@ -421,6 +462,13 @@ export default function WordApp({ onBack, onOpenStorage }: WordAppProps) {
         isOpen={showDocumentList}
         onClose={() => setShowDocumentList(false)}
         onLoadDocument={handleLoadDocument}
+      />
+
+      {/* Template Selector */}
+      <TemplateSelector
+        isOpen={showTemplateSelector}
+        onClose={() => setShowTemplateSelector(false)}
+        onSelect={handleTemplateSelect}
       />
 
       {/* Toast Notifications */}
