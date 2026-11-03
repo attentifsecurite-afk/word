@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import ToastContainer, { showToast } from '../components/Toast';
+import { openFileFromComputer, saveJSONFileToComputer } from '../utils/LocalFileAccess';
 
 interface MailAppProps {
   onBack: () => void;
@@ -222,6 +223,38 @@ export default function MailApp({ onBack, onOpenStorage }: MailAppProps) {
     showToast('Contact supprimé', 'info');
   };
 
+  const handleExportEmails = async () => {
+    const data = { emails, contacts, exportDate: new Date().toISOString() };
+    const result = await saveJSONFileToComputer(data, 'outlook_emails_backup');
+    if (result.success) {
+      showToast(`Emails et contacts exportés : ${result.fileName}`, 'success');
+    } else if (result.error && result.error !== 'Annulé par l\'utilisateur') {
+      showToast(result.error, 'error');
+    }
+  };
+
+  const handleImportEmails = async () => {
+    const result = await openFileFromComputer(['.json']);
+    if (result.success && result.content) {
+      try {
+        const data = JSON.parse(result.content);
+        if (data.emails && Array.isArray(data.emails)) {
+          setEmails(data.emails);
+          if (data.contacts && Array.isArray(data.contacts)) {
+            setContacts(data.contacts);
+          }
+          showToast('Emails et contacts importés avec succès', 'success');
+        } else {
+          showToast('Format de fichier invalide', 'error');
+        }
+      } catch (error) {
+        showToast('Erreur lors de l\'import du fichier', 'error');
+      }
+    } else if (result.error && result.error !== 'Annulé par l\'utilisateur') {
+      showToast(result.error, 'error');
+    }
+  };
+
   const folders = [
     { id: 'inbox' as Folder, name: 'Boîte de réception', icon: 'fas fa-inbox', count: unreadCount },
     { id: 'sent' as Folder, name: 'Envoyés', icon: 'fas fa-paper-plane', count: emails.filter(e => e.folder === 'sent').length },
@@ -248,6 +281,20 @@ export default function MailApp({ onBack, onOpenStorage }: MailAppProps) {
             className="bg-white text-[#0078d4] px-4 py-1 rounded font-medium hover:bg-gray-100 transition text-sm"
           >
             <i className="fas fa-pen mr-1"></i> Nouveau message
+          </button>
+          <button 
+            onClick={handleExportEmails}
+            className="bg-white/20 hover:bg-white/30 px-3 py-1 rounded transition text-sm"
+            title="Exporter les emails et contacts sur votre ordinateur"
+          >
+            <i className="fas fa-hdd mr-1"></i> Exporter
+          </button>
+          <button 
+            onClick={handleImportEmails}
+            className="bg-white/20 hover:bg-white/30 px-3 py-1 rounded transition text-sm"
+            title="Importer des emails et contacts depuis votre ordinateur"
+          >
+            <i className="fas fa-folder-plus mr-1"></i> Importer
           </button>
           {onOpenStorage && (
             <button onClick={onOpenStorage} className="bg-white/20 hover:bg-white/30 px-3 py-1 rounded transition" title="Gestionnaire de stockage">

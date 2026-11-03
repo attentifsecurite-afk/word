@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import ToastContainer, { showToast } from '../components/Toast';
 import { importCSVFile, exportCSV, parseCSV, isLocalStorageAvailable } from '../utils/FileHandler';
+import { openFileFromComputer, saveCSVFileToComputer } from '../utils/LocalFileAccess';
 
 interface SheetAppProps {
   onBack: () => void;
@@ -212,6 +213,50 @@ export default function SheetApp({ onBack, onOpenStorage }: SheetAppProps) {
     showToast('Tableur exporté en CSV', 'success');
   };
 
+  const handleOpenFromComputer = async () => {
+    const result = await openFileFromComputer(['.csv', '.txt']);
+    if (result.success && result.content) {
+      const csvData = parseCSV(result.content);
+      const newCells: Record<string, { value: string }> = {};
+      
+      csvData.forEach((row, rowIndex) => {
+        row.forEach((cellValue, colIndex) => {
+          if (cellValue && rowIndex < ROWS && colIndex < COLS) {
+            const key = getCellKey(rowIndex, colIndex);
+            newCells[key] = { value: cellValue };
+          }
+        });
+      });
+      
+      setCells(newCells);
+      if (result.fileName) {
+        setFileName(result.fileName.replace(/\.csv$/i, ''));
+      }
+      showToast('Tableur ouvert depuis votre ordinateur', 'success');
+    } else if (result.error && result.error !== 'Annulé par l\'utilisateur') {
+      showToast(result.error, 'error');
+    }
+  };
+
+  const handleSaveToComputer = async () => {
+    let csv = '';
+    for (let r = 0; r < ROWS; r++) {
+      const row = [];
+      for (let c = 0; c < COLS; c++) {
+        const key = getCellKey(r, c);
+        row.push(getCellValue(key));
+      }
+      csv += row.join(',') + '\n';
+    }
+    
+    const result = await saveCSVFileToComputer(csv, fileName);
+    if (result.success) {
+      showToast(`Tableur enregistré sur votre ordinateur : ${result.fileName}`, 'success');
+    } else if (result.error && result.error !== 'Annulé par l\'utilisateur') {
+      showToast(result.error, 'error');
+    }
+  };
+
   const tabs = [
     { id: 'home', label: 'Accueil', icon: 'fas fa-home' },
     { id: 'insert', label: 'Insertion', icon: 'fas fa-plus' },
@@ -360,29 +405,46 @@ export default function SheetApp({ onBack, onOpenStorage }: SheetAppProps) {
           <div className="flex items-center gap-4">
             <button 
               onClick={handleImportCSV}
-              className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 rounded transition"
+              className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition"
             >
               <i className="fas fa-file-import text-xl text-[#217346]"></i>
               <span className="text-xs">Importer CSV</span>
             </button>
             <button 
+              onClick={handleOpenFromComputer}
+              className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition"
+              title="Ouvrir un fichier CSV depuis votre ordinateur"
+            >
+              <i className="fas fa-folder-plus text-xl text-[#217346]"></i>
+              <span className="text-xs">Ouvrir depuis...</span>
+            </button>
+            <div className="w-px h-12 bg-gray-300 dark:bg-gray-600"></div>
+            <button 
               onClick={handleExport}
-              className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 rounded transition"
+              className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition"
             >
               <i className="fas fa-file-export text-xl text-[#217346]"></i>
               <span className="text-xs">Exporter CSV</span>
             </button>
-            <div className="border-l border-gray-200 h-12"></div>
+            <button 
+              onClick={handleSaveToComputer}
+              className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition"
+              title="Enregistrer le tableur sur votre ordinateur"
+            >
+              <i className="fas fa-hdd text-xl text-[#217346]"></i>
+              <span className="text-xs">Enregistrer sur...</span>
+            </button>
+            <div className="w-px h-12 bg-gray-300 dark:bg-gray-600"></div>
             <button 
               onClick={() => showToast('Fonction de tri à venir', 'info')}
-              className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 rounded transition"
+              className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition"
             >
               <i className="fas fa-sort text-xl text-[#217346]"></i>
               <span className="text-xs">Trier</span>
             </button>
             <button 
               onClick={() => showToast('Fonction de filtre à venir', 'info')}
-              className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 rounded transition"
+              className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition"
             >
               <i className="fas fa-filter text-xl text-[#217346]"></i>
               <span className="text-xs">Filtrer</span>

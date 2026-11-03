@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import ToastContainer, { showToast } from '../components/Toast';
 import { importJSONFile, exportJSON, isLocalStorageAvailable } from '../utils/FileHandler';
+import { openFileFromComputer, saveJSONFileToComputer } from '../utils/LocalFileAccess';
 
 interface SlideAppProps {
   onBack: () => void;
@@ -126,6 +127,37 @@ export default function SlideApp({ onBack, onOpenStorage }: SlideAppProps) {
     showToast('Présentation exportée', 'success');
   };
 
+  const handleOpenFromComputer = async () => {
+    const result = await openFileFromComputer(['.json']);
+    if (result.success && result.content) {
+      try {
+        const data = JSON.parse(result.content);
+        if (data.fileName && data.slides) {
+          setFileName(data.fileName);
+          setSlides(data.slides);
+          setCurrentSlideIndex(0);
+          showToast('Présentation ouverte depuis votre ordinateur', 'success');
+        } else {
+          showToast('Format de fichier invalide', 'error');
+        }
+      } catch (error) {
+        showToast('Erreur lors de l\'ouverture du fichier', 'error');
+      }
+    } else if (result.error && result.error !== 'Annulé par l\'utilisateur') {
+      showToast(result.error, 'error');
+    }
+  };
+
+  const handleSaveToComputer = async () => {
+    const data = { fileName, slides };
+    const result = await saveJSONFileToComputer(data, fileName);
+    if (result.success) {
+      showToast(`Présentation enregistrée sur votre ordinateur : ${result.fileName}`, 'success');
+    } else if (result.error && result.error !== 'Annulé par l\'utilisateur') {
+      showToast(result.error, 'error');
+    }
+  };
+
   const handleExport = () => {
     const html = `<!DOCTYPE html>
 <html>
@@ -245,11 +277,17 @@ ${slides.map((slide) => `
           )}
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={handleSave} className="hover:bg-white/10 p-1.5 rounded transition" title="Sauvegarder">
+          <button onClick={handleSave} className="hover:bg-white/10 p-1.5 rounded transition" title="Sauvegarder (local)">
             <i className="fas fa-save text-sm"></i>
           </button>
-          <button onClick={handleLoad} className="hover:bg-white/10 p-1.5 rounded transition" title="Charger">
+          <button onClick={handleSaveToComputer} className="hover:bg-white/10 p-1.5 rounded transition" title="Enregistrer sur votre ordinateur">
+            <i className="fas fa-hdd text-sm"></i>
+          </button>
+          <button onClick={handleLoad} className="hover:bg-white/10 p-1.5 rounded transition" title="Charger (local)">
             <i className="fas fa-folder-open text-sm"></i>
+          </button>
+          <button onClick={handleOpenFromComputer} className="hover:bg-white/10 p-1.5 rounded transition" title="Ouvrir depuis votre ordinateur">
+            <i className="fas fa-folder-plus text-sm"></i>
           </button>
           <button onClick={handleImportJSON} className="hover:bg-white/10 p-1.5 rounded transition" title="Importer">
             <i className="fas fa-file-import text-sm"></i>

@@ -7,6 +7,7 @@ import TemplateSelector from '../components/TemplateSelector';
 import ThemeToggle from '../components/ThemeToggle';
 import { DocumentTemplate } from '../utils/templates';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
+import { openFileFromComputer, saveFileToComputer, saveTextFileToComputer } from '../utils/LocalFileAccess';
 
 interface WordAppProps {
   onBack: () => void;
@@ -69,6 +70,67 @@ export default function WordApp({ onBack, onOpenStorage }: WordAppProps) {
       const text = editorRef.current.innerText;
       exportText(text, fileName);
       showToast('Document exporté en TXT', 'success');
+    }
+  };
+
+  const handleOpenFromComputer = async () => {
+    const result = await openFileFromComputer(['.txt', '.html', '.htm', '.md', '.rtf']);
+    if (result.success && result.content && editorRef.current) {
+      // Détecter si c'est du HTML ou du texte
+      if (result.fileName?.match(/\.(html|htm)$/i)) {
+        editorRef.current.innerHTML = result.content;
+      } else {
+        // Convertir le texte en HTML
+        const lines = result.content.split('\n');
+        const htmlContent = lines.map(line => `<p>${line || '<br>'}</p>`).join('');
+        editorRef.current.innerHTML = htmlContent;
+      }
+      
+      if (result.fileName) {
+        setFileName(result.fileName.replace(/\.(txt|html|htm|md|rtf)$/i, ''));
+      }
+      handleInput();
+      showToast('Document ouvert depuis votre ordinateur', 'success');
+    } else if (result.error && result.error !== 'Annulé par l\'utilisateur') {
+      showToast(result.error, 'error');
+    }
+  };
+
+  const handleSaveToComputer = async () => {
+    if (editorRef.current) {
+      const content = editorRef.current.innerHTML;
+      const htmlContent = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>${fileName}</title>
+  <style>
+    body { font-family: 'Calibri', sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; line-height: 1.6; }
+  </style>
+</head>
+<body>
+${content}
+</body>
+</html>`;
+      
+      const result = await saveFileToComputer(htmlContent, `${fileName}.html`);
+      if (result.success) {
+        showToast(`Document enregistré sur votre ordinateur : ${result.fileName}`, 'success');
+      } else if (result.error && result.error !== 'Annulé par l\'utilisateur') {
+        showToast(result.error, 'error');
+      }
+    }
+  };
+
+  const handleSaveTextToComputer = async () => {
+    if (editorRef.current) {
+      const text = editorRef.current.innerText;
+      const result = await saveTextFileToComputer(text, fileName);
+      if (result.success) {
+        showToast(`Document texte enregistré : ${result.fileName}`, 'success');
+      } else if (result.error && result.error !== 'Annulé par l\'utilisateur') {
+        showToast(result.error, 'error');
+      }
     }
   };
 
@@ -380,18 +442,39 @@ export default function WordApp({ onBack, onOpenStorage }: WordAppProps) {
               <i className="fas fa-copy text-xl text-[#2b579a]"></i>
               <span className="text-xs">Modèles</span>
             </button>
+            
+            <div className="w-px h-12 bg-gray-300 dark:bg-gray-600"></div>
+            
             <button onClick={handleSaveLocal} className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition">
               <i className="fas fa-save text-xl text-[#2b579a]"></i>
               <span className="text-xs">Sauvegarder</span>
             </button>
+            <button onClick={handleSaveToComputer} className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition" title="Enregistrer sur votre ordinateur (HTML)">
+              <i className="fas fa-hdd text-xl text-[#2b579a]"></i>
+              <span className="text-xs">Enregistrer sur...</span>
+            </button>
+            <button onClick={handleSaveTextToComputer} className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition" title="Enregistrer en texte brut">
+              <i className="fas fa-file-export text-xl text-[#2b579a]"></i>
+              <span className="text-xs">Enregistrer en TXT</span>
+            </button>
+            
+            <div className="w-px h-12 bg-gray-300 dark:bg-gray-600"></div>
+            
             <button onClick={() => setShowDocumentList(true)} className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition">
               <i className="fas fa-folder-open text-xl text-[#2b579a]"></i>
               <span className="text-xs">Ouvrir</span>
+            </button>
+            <button onClick={handleOpenFromComputer} className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition" title="Ouvrir un fichier depuis votre ordinateur">
+              <i className="fas fa-folder-plus text-xl text-[#2b579a]"></i>
+              <span className="text-xs">Ouvrir depuis...</span>
             </button>
             <button onClick={handleImport} className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition">
               <i className="fas fa-upload text-xl text-[#2b579a]"></i>
               <span className="text-xs">Importer</span>
             </button>
+            
+            <div className="w-px h-12 bg-gray-300 dark:bg-gray-600"></div>
+            
             <button onClick={handlePrint} className="flex flex-col items-center gap-1 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition">
               <i className="fas fa-print text-xl text-[#2b579a]"></i>
               <span className="text-xs">Imprimer</span>
